@@ -1,4 +1,4 @@
-# Mini-IGP8 Parallel Research Experiment (v5)
+# Mini-IGP8 Parallel Research Experiment
 
 A clean-slate autonomous experiment for finding explicit degree-8 integer polynomials for all
 157 target `(8Tn, r)` inverse-Galois pairs, while secondarily improving the smallest known

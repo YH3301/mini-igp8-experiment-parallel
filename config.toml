@@ -5,7 +5,7 @@ master_seed = 20260905
 batch_size = 1000
 oversample_factor = 2
 ask_ai_after_stagnation = 5000
-recent_hash_limit = 250000
+recent_hash_limit = 1000000
 
 [generation]
 # One Sol call proposes five deliberately different hypotheses. Five Terra
@@ -50,7 +50,7 @@ max_checks_per_finalist = 6
 
 [limits]
 # Sage calls are telemetry only and never stop a session.
-max_ai_calls_per_session = 32
+max_ai_calls_per_session = 45
 max_wall_minutes_per_session = 360
 ai_call_seconds = 900
 solver_call_seconds = 30
