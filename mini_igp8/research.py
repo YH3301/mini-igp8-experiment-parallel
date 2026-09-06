@@ -1094,6 +1094,25 @@ class ResearchController:
                 candidate["fresh"] = summarize_fresh_records(
                     candidate["prelim_records"], catalogue_pairs=catalogue_pairs
                 )
+                # A clear gain before the final preliminary round means the candidate
+                # has QUALIFIED for the finalist pool; it does not mean we stop gathering
+                # paired evidence for it.  Every eventual finalist must be evaluated on
+                # the same cumulative seed set as the incumbent, otherwise ranking
+                # finalists at the end would compare (for example) 30-seed evidence
+                # against the incumbent's 60-seed evidence.
+                if candidate.get("_prelim_qualified"):
+                    candidate["prelim_seeds"] = seed_cursor
+                    if round_index >= len(self.config.fresh_round_seed_counts) - 1:
+                        candidate["status"] = "preliminary_passed"
+                        passed.append(candidate)
+                        self._say(
+                            f"candidate {candidate['id']}: preliminary qualification confirmed "
+                            f"on {seed_cursor} shared seeds"
+                        )
+                    else:
+                        still_active.append(candidate)
+                    continue
+
                 action, reason = race_checkpoint_decision(
                     self.store.state()["incumbent_benchmark"],
                     candidate["benchmark"],
@@ -1105,9 +1124,18 @@ class ResearchController:
                 candidate["prelim_reason"] = reason
                 candidate["prelim_seeds"] = seed_cursor
                 if action == "accept":
-                    candidate["status"] = "preliminary_passed"
-                    passed.append(candidate)
-                    self._say(f"candidate {candidate['id']}: passed preliminary race ({reason})")
+                    candidate["_prelim_qualified"] = True
+                    if round_index >= len(self.config.fresh_round_seed_counts) - 1:
+                        candidate["status"] = "preliminary_passed"
+                        passed.append(candidate)
+                        self._say(f"candidate {candidate['id']}: passed preliminary race ({reason})")
+                    else:
+                        candidate["status"] = "preliminary_qualified"
+                        still_active.append(candidate)
+                        self._say(
+                            f"candidate {candidate['id']}: qualified early ({reason}); "
+                            "continuing on later shared seeds for fair finalist ranking"
+                        )
                 elif action == "reject":
                     candidate["status"] = "preliminary_rejected"
                     candidate["reason"] = reason
