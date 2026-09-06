@@ -852,7 +852,8 @@ class ResearchController:
             "priorities": [
                 "Missing target-pair discovery is primary.",
                 "Smaller field discriminants for solved pairs are secondary.",
-                "Keep generation fast enough for thousands of candidates.",
+                "Keep coefficient generation fast: 2,000 candidates must complete comfortably within the solver timeout.",
+                "Use bounded deterministic generation; avoid unbounded rejection loops or expensive algebraic verification inside solver.py.",
                 "Edit solver.py only; do not create files or commit.",
             ],
         }, sort_keys=True)
@@ -975,24 +976,35 @@ class ResearchController:
         self._say(f"generation: screen survivors={','.join(sorted(survivor_ids)) or 'none'}")
         return survivors
 
-    def _benchmark_candidates(self, candidates: list[dict], budget: Budget) -> None:
+    def _benchmark_candidates(self, candidates: list[dict], budget: Budget) -> list[dict]:
+        passed: list[dict] = []
         for candidate in candidates:
             self._say(f"candidate {candidate['id']}: frozen benchmark {self.config.benchmark_slots} slots")
-            summary, _records, hashes = evaluate_fixed(
-                candidate["path"],
-                seeds=self.config.benchmark_seeds,
-                candidates_per_seed=self.config.benchmark_size,
-                solver_seconds=self.config.solver_seconds,
-                verification_seconds=self.config.verification_seconds,
-                verifier=self.verifier,
-                deadline=budget.deadline,
-                progress=self._stage_progress(f"candidate {candidate['id']} benchmark"),
-                progress_every=self.config.progress_every,
-            )
+            try:
+                summary, _records, hashes = evaluate_fixed(
+                    candidate["path"],
+                    seeds=self.config.benchmark_seeds,
+                    candidates_per_seed=self.config.benchmark_size,
+                    solver_seconds=self.config.solver_seconds,
+                    verification_seconds=self.config.verification_seconds,
+                    verifier=self.verifier,
+                    deadline=budget.deadline,
+                    progress=self._stage_progress(f"candidate {candidate['id']} benchmark"),
+                    progress_every=self.config.progress_every,
+                )
+            except SolverError as exc:
+                candidate["status"] = "benchmark_rejected"
+                candidate["reason"] = str(exc).split(":", 1)[0]
+                self._say(
+                    f"candidate {candidate['id']}: rejected during benchmark ({candidate['reason']})"
+                )
+                continue
             budget.spend_sage(summary["sage_calls"])
             candidate["sage_calls"] = candidate.get("sage_calls", 0) + summary["sage_calls"]
             candidate["benchmark"] = summary
             candidate["eval_hashes"].update(hashes)
+            passed.append(candidate)
+        return passed
 
     def _preliminary_race(
         self,
@@ -1047,22 +1059,33 @@ class ResearchController:
 
             still_active: list[dict] = []
             for candidate in active:
-                summary, records, hashes = evaluate_fresh(
-                    candidate["path"],
-                    seeds=seeds,
-                    candidates_per_seed=self.config.fresh_size,
-                    oversample_factor=self.config.fresh_oversample,
-                    catalogue_pairs=catalogue_pairs,
-                    already_seen=candidate["prelim_seen"],
-                    solver_seconds=self.config.solver_seconds,
-                    verification_seconds=self.config.verification_seconds,
-                    verifier=self.verifier,
-                    deadline=budget.deadline,
-                    progress=self._stage_progress(
-                        f"candidate {candidate['id']} prelim r{round_index + 1}"
-                    ),
-                    progress_every=self.config.progress_every,
-                )
+                try:
+                    summary, records, hashes = evaluate_fresh(
+                        candidate["path"],
+                        seeds=seeds,
+                        candidates_per_seed=self.config.fresh_size,
+                        oversample_factor=self.config.fresh_oversample,
+                        catalogue_pairs=catalogue_pairs,
+                        already_seen=candidate["prelim_seen"],
+                        solver_seconds=self.config.solver_seconds,
+                        verification_seconds=self.config.verification_seconds,
+                        verifier=self.verifier,
+                        deadline=budget.deadline,
+                        progress=self._stage_progress(
+                            f"candidate {candidate['id']} prelim r{round_index + 1}"
+                        ),
+                        progress_every=self.config.progress_every,
+                    )
+                except SolverError as exc:
+                    candidate["status"] = "preliminary_rejected"
+                    candidate["reason"] = str(exc).split(":", 1)[0]
+                    candidate["prelim_reason"] = candidate["reason"]
+                    candidate["prelim_seeds"] = seed_cursor
+                    self._say(
+                        f"candidate {candidate['id']}: preliminary rejection "
+                        f"({candidate['reason']})"
+                    )
+                    continue
                 budget.spend_sage(summary["sage_calls"])
                 candidate["sage_calls"] = candidate.get("sage_calls", 0) + summary["sage_calls"]
                 candidate["prelim_seen"].update(hashes)
@@ -1173,6 +1196,8 @@ class ResearchController:
                 "Do not create files or commit.",
                 "Do not hard-code known answers or hidden seeds.",
                 "Primary objective is missing-pair discovery; discriminant reduction is secondary.",
+                "Keep coefficient generation fast: 2,000 candidates must complete comfortably within the solver timeout.",
+                "Use bounded deterministic generation; avoid unbounded rejection loops or expensive algebraic verification inside solver.py.",
             ],
         }, sort_keys=True)
         budget.reserve_ai(1)
@@ -1356,21 +1381,30 @@ class ResearchController:
             incumbent_records.extend(records)
             incumbent_fresh = summarize_fresh_records(incumbent_records, catalogue_pairs=catalogue_pairs)
 
+            round_survivors: list[dict] = []
             for candidate in active:
-                summary, records, hashes = evaluate_fresh(
-                    candidate["path"],
-                    seeds=seeds,
-                    candidates_per_seed=self.config.final_size,
-                    oversample_factor=self.config.final_oversample,
-                    catalogue_pairs=catalogue_pairs,
-                    already_seen=candidate["final_seen"],
-                    solver_seconds=self.config.solver_seconds,
-                    verification_seconds=self.config.verification_seconds,
-                    verifier=self.verifier,
-                    deadline=budget.deadline,
-                    progress=self._stage_progress(f"candidate {candidate['id']} final r{round_index + 1}"),
-                    progress_every=self.config.progress_every,
-                )
+                try:
+                    summary, records, hashes = evaluate_fresh(
+                        candidate["path"],
+                        seeds=seeds,
+                        candidates_per_seed=self.config.final_size,
+                        oversample_factor=self.config.final_oversample,
+                        catalogue_pairs=catalogue_pairs,
+                        already_seen=candidate["final_seen"],
+                        solver_seconds=self.config.solver_seconds,
+                        verification_seconds=self.config.verification_seconds,
+                        verifier=self.verifier,
+                        deadline=budget.deadline,
+                        progress=self._stage_progress(f"candidate {candidate['id']} final r{round_index + 1}"),
+                        progress_every=self.config.progress_every,
+                    )
+                except SolverError as exc:
+                    candidate["status"] = "final_rejected"
+                    candidate["reason"] = str(exc).split(":", 1)[0]
+                    self._say(
+                        f"candidate {candidate['id']}: final rejection ({candidate['reason']})"
+                    )
+                    continue
                 budget.spend_sage(summary["sage_calls"])
                 candidate["sage_calls"] = candidate.get("sage_calls", 0) + summary["sage_calls"]
                 candidate["final_seen"].update(hashes)
@@ -1379,6 +1413,8 @@ class ResearchController:
                     candidate["final_records"], catalogue_pairs=catalogue_pairs
                 )
                 candidate["final_seeds"] = seed_cursor
+                round_survivors.append(candidate)
+            active = round_survivors
 
             if round_index == 0 and len(active) > self.config.final_max_challengers_after_round1:
                 active.sort(key=lambda c: _candidate_rank(c, incumbent_fresh), reverse=True)
@@ -1548,7 +1584,8 @@ class ResearchController:
             candidates = self._parallel_implement(research["hypotheses"], budget, generation_dir)
             survivors = self._screen_candidates(candidates, budget, catalogue_pairs)
             if survivors:
-                self._benchmark_candidates(survivors, budget)
+                survivors = self._benchmark_candidates(survivors, budget)
+            if survivors:
                 finalists, incumbent_prelim = self._preliminary_race(
                     survivors,
                     generation=generation,
@@ -1865,8 +1902,10 @@ class ResearchController:
                     )
             except (SolverError, CodexFailure) as exc:
                 stop_code = "research_infrastructure_failure"
+                detail = str(exc)
+                self._say(f"research infrastructure failure: {detail}")
                 self.store.append_history(
-                    "research_infrastructure_failure", {"detail": str(exc)}, session_id=session_id
+                    "research_infrastructure_failure", {"detail": detail}, session_id=session_id
                 )
             finally:
                 self._cleanup_candidate_workspace()

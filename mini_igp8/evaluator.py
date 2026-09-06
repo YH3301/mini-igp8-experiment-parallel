@@ -34,6 +34,9 @@ FORBIDDEN_NAMES = {
 MAX_SOLVER_SOURCE_CHARS = 100_000
 
 
+MAX_BATCHED_SOLVER_CANDIDATES = 2000
+
+
 class SolverError(RuntimeError):
     """A solver failed a precisely identified interface requirement."""
 
@@ -305,6 +308,55 @@ def call_solver(
     )[0]
 
 
+def _call_solver_cases_chunked(
+    solver_path: Path,
+    *,
+    cases: list[tuple[int, int]],
+    timeout_seconds: int | float,
+    deadline: float | None = None,
+    max_candidates_per_process: int = MAX_BATCHED_SOLVER_CANDIDATES,
+) -> list[list[list[int]]]:
+    """Execute many logical solver calls without giving one giant batch one tiny timeout.
+
+    ``solver_call_seconds`` is calibrated against roughly one normal search-sized
+    generation (2,000 generated candidates by default).  Fresh races can contain
+    dozens of seeds; sending all of them through one subprocess accidentally made
+    the same timeout cover 4,000--12,000 generated candidates.  Chunking preserves
+    interpreter amortization while keeping the timeout semantics comparable across
+    screening, benchmarks, and larger race rounds.
+    """
+
+    if max_candidates_per_process <= 0:
+        raise ValueError("max_candidates_per_process_must_be_positive")
+    if not cases:
+        return []
+
+    outputs: list[list[list[int]]] = []
+    chunk: list[tuple[int, int]] = []
+    chunk_candidates = 0
+    for case in cases:
+        budget = int(case[1])
+        if chunk and chunk_candidates + budget > max_candidates_per_process:
+            outputs.extend(_call_solver_cases(
+                solver_path, cases=chunk, timeout_seconds=timeout_seconds, deadline=deadline
+            ))
+            chunk = []
+            chunk_candidates = 0
+        chunk.append(case)
+        chunk_candidates += budget
+        if chunk_candidates >= max_candidates_per_process:
+            outputs.extend(_call_solver_cases(
+                solver_path, cases=chunk, timeout_seconds=timeout_seconds, deadline=deadline
+            ))
+            chunk = []
+            chunk_candidates = 0
+    if chunk:
+        outputs.extend(_call_solver_cases(
+            solver_path, cases=chunk, timeout_seconds=timeout_seconds, deadline=deadline
+        ))
+    return outputs
+
+
 def validate_solver_contract(
     solver_path: Path,
     *,
@@ -385,7 +437,7 @@ def evaluate_fixed(
     started = time.monotonic()
     done = 0
     _check_deadline(deadline)
-    batches = _call_solver_cases(
+    batches = _call_solver_cases_chunked(
         solver_path,
         cases=[(seed, candidates_per_seed) for seed in seeds],
         timeout_seconds=solver_seconds,
@@ -556,7 +608,7 @@ def evaluate_fresh(
     variant_seen = set(already_seen)
     done = 0
     _check_deadline(deadline)
-    batches = _call_solver_cases(
+    batches = _call_solver_cases_chunked(
         solver_path,
         cases=[(seed, candidates_per_seed * oversample_factor) for seed in seeds],
         timeout_seconds=solver_seconds,
