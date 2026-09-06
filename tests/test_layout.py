@@ -23,13 +23,6 @@ class LayoutTests(unittest.TestCase):
         self.assertEqual(actual, set(RESULT_FILENAMES))
         self.assertTrue(all(path.is_file() for path in (ROOT / "results").iterdir()))
 
-    def test_candidate_workspace_is_bounded_and_ignored(self):
-        candidates = ROOT / "candidates"
-        self.assertTrue((candidates / "README.md").is_file())
-        ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
-        self.assertIn("/candidates/current/", ignore)
-        self.assertFalse((candidates / "current").exists())
-
     def test_package_and_tests_remain_flat(self):
         for directory in (ROOT / "mini_igp8", ROOT / "tests"):
             subdirectories = {

@@ -14,5 +14,4 @@ htmlcov/
 build/
 dist/
 *.tmp
-/candidates/current/
 /.mini-igp8-research.lock
