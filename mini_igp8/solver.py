@@ -1,285 +1,202 @@
-"""A deterministic portfolio of structured, monic degree-eight polynomials.
+"""Deterministic signed-cube and quadratic--quartic orbit generator.
 
-The output is deliberately organized around permutation geometry rather than a
-generic coefficient box. Coefficients are in ascending order.
+Vectors use ascending coefficients.  The generator has no catalogue data and
+all retries are bounded, so large requests remain inexpensive.
 """
-
 from __future__ import annotations
 
 from fractions import Fraction
+from math import comb, gcd
 
+MASK=(1<<64)-1
+SHELLS=(2,3,5,8,12,17,23)
+PRIMES=(3,5,7,11)
 
-_MASK64 = (1 << 64) - 1
-_WEIGHTS = (15, 10, 15, 15, 15, 15, 15)
-# g(q), reciprocal lift, Q(h), quadratic iterate, Dickson, sparse, Eisenstein
-_SHELLS = (3, 5, 8, 12)
+def _mix(x:int)->int:
+    x=(x+0x9E3779B97F4A7C15)&MASK; x=((x^(x>>30))*0xBF58476D1CE4E5B9)&MASK
+    x=((x^(x>>27))*0x94D049BB133111EB)&MASK; return x^(x>>31)
+def _word(seed:int,lane:int,n:int,i:int)->int:
+    return _mix((seed&MASK)^(lane+1)*0xD1B54A32D192ED03^(n+1)*0x94D049BB133111EB^(i+1)*0xBF58476D1CE4E5B9)
+def _signed(seed:int,lane:int,n:int,i:int,h:int)->int: return _word(seed,lane,n,i)%(2*h+1)-h
+def _trim(a:list[int])->list[int]:
+    while len(a)>1 and not a[-1]: a.pop()
+    return a
+def _add(a:list[int],b:list[int])->list[int]:
+    z=[0]*max(len(a),len(b))
+    for i,x in enumerate(a): z[i]+=x
+    for i,x in enumerate(b): z[i]+=x
+    return _trim(z)
+def _mul(a:list[int],b:list[int])->list[int]:
+    z=[0]*(len(a)+len(b)-1)
+    for i,x in enumerate(a):
+        for j,y in enumerate(b): z[i+j]+=x*y
+    return _trim(z)
+def _eval(a:list[int],x:int)->int:
+    z=0
+    for v in reversed(a): z=z*x+v
+    return z
 
-
-def _mix64(value: int) -> int:
-    """Stable counter mixer, independent of Python's hash randomization."""
-    value = (value + 0x9E3779B97F4A7C15) & _MASK64
-    value = ((value ^ (value >> 30)) * 0xBF58476D1CE4E5B9) & _MASK64
-    value = ((value ^ (value >> 27)) * 0x94D049BB133111EB) & _MASK64
-    return value ^ (value >> 31)
-
-
-def _word(seed: int, lane: int, counter: int, coordinate: int) -> int:
-    value = seed & _MASK64
-    value ^= (lane + 1) * 0xD1B54A32D192ED03
-    value ^= (counter + 1) * 0x94D049BB133111EB
-    value ^= (coordinate + 1) * 0xBF58476D1CE4E5B9
-    return _mix64(value)
-
-
-def _signed(seed: int, lane: int, counter: int, coordinate: int, shell: int) -> int:
-    return _word(seed, lane, counter, coordinate) % (2 * shell + 1) - shell
-
-
-def _multiply(left: list[int], right: list[int]) -> list[int]:
-    product = [0] * (len(left) + len(right) - 1)
-    for i, a in enumerate(left):
-        for j, b in enumerate(right):
-            product[i + j] += a * b
-    return product
-
-
-def _compose(outer: list[int], inner: list[int]) -> list[int]:
-    result = [outer[-1]]
-    for coefficient in reversed(outer[:-1]):
-        result = _multiply(result, inner)
-        result[0] += coefficient
-    return result
-
-
-def _value(coefficients: list[int], x: int) -> int:
-    result = 0
-    for coefficient in reversed(coefficients):
-        result = result * x + coefficient
-    return result
-
-
-def _usable(coefficients: list[int]) -> bool:
-    """Reject only cheap degeneracies; thin exceptional loci stay available."""
-    return (
-        len(coefficients) == 9
-        and coefficients[0] != 0
-        and coefficients[-1] == 1
-        and all(_value(coefficients, root) != 0 for root in (-2, -1, 1, 2))
-    )
-
-
-def _general_two(seed: int, counter: int, shell: int) -> list[int]:
-    """g(q(x)): four natural blocks of size two."""
-    u = _signed(seed, 0, counter, 0, shell)
-    v = _signed(seed, 0, counter, 1, shell)
-    outer = [_signed(seed, 0, counter, index + 2, shell) for index in range(4)]
-    return _compose(outer + [1], [v, u, 1])
-
-
-def _reciprocal(seed: int, counter: int, shell: int) -> list[int]:
-    """x^4 h(x+x^-1), a reciprocal size-two-block sublocus."""
-    c0, c1, c2, c3 = (
-        _signed(seed, 1, counter, coordinate, shell) for coordinate in range(4)
-    )
-    return [1, c3, 4 + c2, 3 * c3 + c1, 6 + 2 * c2 + c0,
-            3 * c3 + c1, 4 + c2, c3, 1]
-
-
-def _four_blocks(seed: int, counter: int, shell: int) -> list[int]:
-    """Q(h(x)): two natural blocks of size four."""
-    d, c, b, linear, constant = (
-        _signed(seed, 2, counter, coordinate, shell) for coordinate in range(5)
-    )
-    # Trace-normalising h makes this orientation distinct without large shifts.
-    return _compose([constant, linear, 1], [d, c, b, 0, 1])
-
-
-def _nested(seed: int, counter: int, shell: int) -> list[int]:
-    """The third iterate of a quadratic map, minus a target."""
-    u = _signed(seed, 3, counter, 0, shell)
-    v = _signed(seed, 3, counter, 1, shell)
-    target = _signed(seed, 3, counter, 2, shell * shell + 2)
-    polynomial = [0, 1]
-    for _ in range(3):
-        polynomial = _compose([v, u, 1], polynomial)
-    polynomial[0] -= target
-    return polynomial
-
-
-def _dickson(seed: int, counter: int, shell: int) -> list[int]:
-    """D_8(x,a) plus controlled affine perturbations."""
-    a = _signed(seed, 4, counter, 0, shell)
-    previous, current = [2], [0, 1]
-    for _ in range(2, 9):
-        following = [0] + current
-        for index, coefficient in enumerate(previous):
-            following[index] -= a * coefficient
-        previous, current = current, following
-    current[0] += _signed(seed, 4, counter, 1, 2 * shell)
-    current[1] += _signed(seed, 4, counter, 2, 2 * shell)
-    return current
-
-
-def _sparse(seed: int, counter: int, shell: int) -> list[int]:
-    """Three- and four-term low-height octics cycling support patterns."""
-    first = 1 + counter % 7
-    second = 1 + (_word(seed, 5, counter, 0) % 7)
-    if second == first:
-        second = second % 7 + 1
-    coefficients = [_signed(seed, 5, counter, 1, shell) or 1] + [0] * 7 + [1]
-    coefficients[first] = _signed(seed, 5, counter, 2, 2 * shell) or 1
-    if counter % 3:
-        coefficients[second] = _signed(seed, 5, counter, 3, shell) or -1
-    return coefficients
-
-
-def _not_divisible(seed: int, counter: int, coordinate: int, prime: int, shell: int) -> int:
-    value = _signed(seed, 6, counter, coordinate, shell)
-    if value == 0 or value % prime == 0:
-        value = 1 if (_word(seed, 6, counter, coordinate + 20) & 1) else -1
-    return value
-
-
-def _eisenstein(seed: int, counter: int, shell: int) -> list[int]:
-    """Low-height dense, alternating, and sparse shapes, Eisenstein at p."""
-    prime = (2, 3, 5)[counter % 3]
-    shape = (counter // 3) % 3
-    interior = [0] * 6
-    if shape == 0:
-        interior = [_signed(seed, 6, counter, i, shell) for i in range(6)]
-    elif shape == 1:
-        for i in range(6):
-            magnitude = abs(_signed(seed, 6, counter, i, shell))
-            interior[i] = magnitude if i % 2 == 0 else -magnitude
+def _cubic_irred(a:int,b:int,c:int)->bool:
+    if not c:return False
+    f=[c,b,a,1]
+    return not any(c%d==0 and (_eval(f,d)==0 or _eval(f,-d)==0) for d in range(1,abs(c)+1))
+def _mt(v:list[int],a:int,b:int,c:int)->list[int]: return [-c*v[2],v[0]-b*v[2],v[1]-a*v[2]]
+def _sym(a:int,b:int,c:int,q:list[int])->tuple[int,int,int]:
+    tq=_mt(q,a,b,c); t2=_mt(tq,a,b,c); m00,m10,m20=q; m01,m11,m21=tq; m02,m12,m22=t2
+    e1=m00+m11+m22
+    e2=m00*m11+m00*m22+m11*m22-m01*m10-m02*m20-m12*m21
+    e3=m00*(m11*m22-m12*m21)-m01*(m10*m22-m12*m20)+m02*(m10*m21-m11*m20)
+    return e1,e2,e3
+def _cube(e1:int,e2:int,e3:int)->list[int]:
+    return [(e1*e1-4*e2)**2,0,-4*e1**3+16*e1*e2-64*e3,0,6*e1*e1-8*e2,0,-4*e1,0,1]
+def _cube_try(seed:int,lane:int,n:int,h:int)->tuple[list[int],tuple]|None:
+    if lane==1: # Shanks cubics: square discriminant
+        m=_signed(seed,lane,n,0,h); a,b,c=-m,-m-3,-1; q=[_signed(seed,lane,n,1,h),1,_signed(seed,lane,n,2,h) or 1]
+    elif lane==2: # sparse / trace normalized
+        a=_signed(seed,lane,n,0,h) if n&1 else 0; b=_signed(seed,lane,n,1,h) if not n&1 else 0; c=_signed(seed,lane,n,2,h) or 1
+        q=[_signed(seed,lane,n,3,h),_signed(seed,lane,n,4,h) or 1,0]
     else:
-        for offset in range(2 + (counter & 1)):
-            index = (_word(seed, 6, counter, 10 + offset) + offset) % 6
-            interior[index] = _not_divisible(seed, counter, 16 + offset, prime, shell)
-    trace = 0 if counter % 7 else _not_divisible(seed, counter, 30, prime, shell)
-    return [prime * _not_divisible(seed, counter, 31, prime, shell)] + [
-        prime * value for value in interior
-    ] + [prime * trace, 1]
+        a,b,c=(_signed(seed,lane,n,i,h) for i in range(3)); c=c or 1
+        q=[_signed(seed,lane,n,3,h),_signed(seed,lane,n,4,h) or 1,_signed(seed,lane,n,5,max(1,h//2)) if lane==3 else 0]
+    if not _cubic_irred(a,b,c): return None
+    e=_sym(a,b,c,q)
+    if e[2]==0 or e[0]*e[0]==4*e[1]: return None
+    return _cube(*e),("cube",lane,e)
 
+def _quartic(seed:int,lane:int,n:int,h:int)->list[int]:
+    s=lambda i:_signed(seed,lane+10,n,i,h)
+    if lane==5:return [s(0) or 1,s(1),s(2),s(3),1]
+    if lane==6:return [s(0) or 1,0,s(1),0,1]
+    if lane==7:return [s(2) or 1,s(1),s(0),s(3),1]
+    if lane==8:return [1,s(0),s(1),s(0),1]
+    p=(2,3,5)[n%3]; u=s(0) or 1
+    if u%p==0:u+=1
+    mid=[0,0,0]; mid[_word(seed,lane,n,1)%3]=p*(s(2) or 1)
+    return [p*u,*mid,1]
+def _quad(seed:int,lane:int,n:int,h:int)->tuple[int,int]:
+    b=_signed(seed,lane+30,n,0,h); mag=1+_word(seed,lane+30,n,1)%(h+2)
+    return (b,-mag) if (lane+n)&1 else (b,b*b//4+mag+1)
+def _comp(f:list[int],b:int,c:int,k:int)->list[int]:
+    powers=[(1,0)]
+    for _ in range(4):
+        u,v=powers[-1];powers.append((-c*v,u-b*v))
+    A,B=[0],[0]
+    for d,coef in enumerate(f):
+        for j in range(d+1):
+            u,v=powers[j]; t=[0]*(d-j+1);t[-1]=coef*comb(d,j)*(-k)**j
+            if u:A=_add(A,[u*x for x in t])
+            if v:B=_add(B,[v*x for x in t])
+    return _add(_add(_mul(A,A),[-b*x for x in _mul(A,B)]),[c*x for x in _mul(B,B)])
 
-def _trim(poly: list[Fraction]) -> list[Fraction]:
-    while len(poly) > 1 and not poly[-1]:
-        poly.pop()
-    return poly
+# Small finite-field factor-degree engine.  A rational factor degree must occur
+# as a subset sum at every good prime; this is much less biased than demanding
+# an irreducible reduction (which loses many signed-cube groups).
+def _mp(a:list[int],p:int)->list[int]:return _trim([x%p for x in a])
+def _mulp(a:list[int],b:list[int],p:int)->list[int]:return _trim([x%p for x in _mul(a,b)])
+def _dr(a:list[int],b:list[int],p:int)->tuple[list[int],list[int]]:
+    a=_mp(a[:],p);b=_mp(b[:],p);q=[0]*max(1,len(a)-len(b)+1);inv=pow(b[-1],-1,p)
+    while len(a)>=len(b) and a!=[0]:
+        d=len(a)-len(b);z=a[-1]*inv%p;q[d]=z
+        for i,x in enumerate(b):a[i+d]=(a[i+d]-z*x)%p
+        _trim(a)
+    return _trim(q),a
+def _gp(a:list[int],b:list[int],p:int)->list[int]:
+    while b!=[0]:a,b=b,_dr(a,b,p)[1]
+    inv=pow(a[-1],-1,p);return [x*inv%p for x in a]
+def _power(a:list[int],n:int,f:list[int],p:int)->list[int]:
+    z=[1]
+    while n:
+        if n&1:z=_dr(_mulp(z,a,p),f,p)[1]
+        a=_dr(_mulp(a,a,p),f,p)[1];n//=2
+    return z
+def _degrees(poly:list[int],p:int)->list[int]|None:
+    f=_mp(poly,p)
+    if len(f)!=9 or f[-1]==0 or _gp(f,[i*f[i] for i in range(1,len(f))],p)!=[1]:return None
+    ans=[];prev=0
+    for d in range(1,5):
+        xp=_power([0,1],p**d,f,p); g=_gp(f,_add(xp,[-1]),p); total=len(g)-1
+        ans += [d]*((total-prev)//d);prev=total
+    if sum(ans)<8:ans.append(8-sum(ans))
+    return ans
+def _sieve(poly:list[int])->tuple[bool,tuple]:
+    poss=set(range(1,5));pat=[]
+    for p in PRIMES:
+        ds=_degrees(poly,p)
+        if ds is None:continue
+        sums={0}
+        for d in ds:sums|={x+d for x in tuple(sums)}
+        poss&=sums;pat.append(tuple(ds))
+    return (not poss or len(pat)>=3),tuple(pat)
 
+def _sturm(a:list[int],positive:bool=False)->int:
+    seq=[_trim(a[:]),_trim([i*a[i] for i in range(1,len(a))])]
+    while len(seq[-1])>1:
+        x=[Fraction(v) for v in seq[-2]];y=[Fraction(v) for v in seq[-1]]
+        while len(x)>=len(y):
+            z=x[-1]/y[-1];d=len(x)-len(y)
+            for i,v in enumerate(y):x[i+d]-=z*v
+            while len(x)>1 and not x[-1]:x.pop()
+        den=1
+        for v in x:den=den*v.denominator//gcd(den,v.denominator)
+        seq.append(_trim([-int(v*den) for v in x]))
+    changes=lambda s:sum(x!=y for x,y in zip(s,s[1:]))
+    inf=[1 if q[-1]>0 else -1 for q in seq]
+    if positive:
+        zero=[]
+        for q in seq:
+            v=next((x for x in q if x),1);zero.append(1 if v>0 else -1)
+        return changes(zero)-changes(inf)
+    neg=[(1 if q[-1]>0 else -1)*((-1)**(len(q)-1)) for q in seq]
+    return changes(neg)-changes(inf)
+def _canonical(p:list[int])->tuple[int,...]:return min(tuple(p),tuple((-1)**i*x for i,x in enumerate(p)))
+def _quotas(n:int,w:list[int])->list[int]:
+    t=sum(w);q=[n*x//t for x in w]
+    for i in sorted(range(len(w)),key=lambda i:(-(n*w[i]%t),i))[:n-sum(q)]:q[i]+=1
+    return q
+def _schedule(n:int)->list[tuple[int,int,int]]:
+    cube,comp=_quotas(n,[60,40]); reserve=_quotas(n,[8,8,84])[:2]; sigs=[2]*reserve[0]+[6]*reserve[1]
+    rest=cube-len(sigs);sigs += ([0,4,8]*(rest//3)+[0,4,8][:rest%3])
+    q=_quotas(cube,[15,20,15,10]);used=[0]*4;out=[]
+    for sig in sigs:
+        j=next(i for i in range(4) if used[i]<q[i]);used[j]+=1;out.append((0,j,sig))
+    q=_quotas(comp,[10,9,8,7,6]);used=[0]*5
+    for i in range(comp):
+        j=next(k for k in range(5) if used[k]<q[k]);used[j]+=1;out.append((1,j,[0,4,8][i%3]))
+    return sorted(enumerate(out),key=lambda z:(z[1][0],z[0]%7,z[1][1])) and [x for _,x in sorted(enumerate(out),key=lambda z:(z[0]%7,z[1][0],z[1][1]))]
+def _fallback(n:int)->list[int]:return [2*(2*n+1),2,0,0,0,0,0,0,1]
 
-def _remainder(dividend: list[Fraction], divisor: list[Fraction]) -> list[Fraction]:
-    remainder = dividend[:]
-    while len(remainder) >= len(divisor):
-        scale = remainder[-1] / divisor[-1]
-        offset = len(remainder) - len(divisor)
-        for index, coefficient in enumerate(divisor):
-            remainder[index + offset] -= scale * coefficient
-        _trim(remainder)
-    return remainder
-
-
-def _real_root_count(coefficients: list[int]) -> int:
-    """Exact Sturm count, used only by the small Eisenstein lane."""
-    first = [Fraction(value) for value in coefficients]
-    derivative = [Fraction(i) * first[i] for i in range(1, len(first))]
-    sturm = [_trim(first), _trim(derivative)]
-    while len(sturm[-1]) > 1:
-        sturm.append(_trim([-value for value in _remainder(sturm[-2], sturm[-1])]))
-
-    def variations(positive: bool) -> int:
-        signs = []
-        for polynomial in sturm:
-            sign = 1 if polynomial[-1] > 0 else -1
-            if not positive and (len(polynomial) - 1) % 2:
-                sign = -sign
-            signs.append(sign)
-        return sum(left != right for left, right in zip(signs, signs[1:]))
-
-    return variations(False) - variations(True)
-
-
-_GENERATORS = (_general_two, _reciprocal, _four_blocks, _nested, _dickson, _sparse, _eisenstein)
-
-
-def _quotas(budget: int) -> list[int]:
-    """Largest-remainder allocation for the 15/10/15/... portfolio."""
-    total = sum(_WEIGHTS)
-    quotas = [budget * weight // total for weight in _WEIGHTS]
-    remainder = budget - sum(quotas)
-    order = sorted(range(len(_WEIGHTS)), key=lambda i: (-(budget * _WEIGHTS[i] % total), i))
-    for lane in order[:remainder]:
-        quotas[lane] += 1
-    return quotas
-
-
-def _schedule(seed: int, budget: int) -> list[int]:
-    """Spread exact quotas evenly; seed-keyed ties diversify every prefix."""
-    quotas = _quotas(budget)
-    used = [0] * len(quotas)
-    order: list[int] = []
-    for position in range(budget):
-        best = max(
-            range(len(quotas)),
-            key=lambda lane: (
-                (position + 1) * quotas[lane] - used[lane] * budget,
-                _word(seed, 20 + position // 7, lane, position),
-            ),
-        )
-        used[best] += 1
-        order.append(best)
-    return order
-
-
-def _score(coefficients: list[int], support_seen: set[tuple[int, ...]]) -> int:
-    """A deliberately local low-height proxy, never a cross-lane ranking."""
-    height = max(abs(value) for value in coefficients[:-1])
-    mass = sum(abs(value) for value in coefficients[:-1])
-    support = tuple(i for i, value in enumerate(coefficients[:-1]) if value)
-    return height * 64 + mass + (17 if support in support_seen else 0)
-
-
-def _fallback_eisenstein(serial: int) -> list[int]:
-    """Injective, unmistakably Eisenstein backstop for pathological collisions."""
-    return [2 * (2 * serial + 1), 0, 0, 0, 0, 0, 2 * (1_000_000 + serial), 0, 1]
-
-
-def generate_candidates(seed: int, budget: int) -> list[list[int]]:
-    """Return exactly ``budget`` unique structured monic octics."""
-    if isinstance(budget, bool) or not isinstance(budget, int):
-        raise TypeError("budget must be an integer")
-    if budget < 0:
-        raise ValueError("budget must be nonnegative")
-
-    counters = [0] * len(_GENERATORS)
-    seen: set[tuple[int, ...]] = set()
-    support_seen: set[tuple[int, ...]] = set()
-    output: list[list[int]] = []
-
-    for position, primary in enumerate(_schedule(seed, budget)):
-        # Only the overlapping size-two constructions spill into one another.
-        lanes = (primary, 1 - primary) if primary in (0, 1) else (primary,)
-        proposals: list[list[int]] = []
-        for lane in lanes:
-            for attempt in range(4):
-                counter = counters[lane]
-                counters[lane] += 1
-                proposal = _GENERATORS[lane](seed, counter, _SHELLS[attempt])
-                if not _usable(proposal) or tuple(proposal) in seen:
-                    continue
-                if lane == 6:
-                    desired = (0, 2, 4, 6)[position % 4]
-                    if _real_root_count(proposal) != desired and attempt < 3:
-                        continue
-                proposals.append(proposal)
-            if proposals:
-                break
-
-        if proposals:
-            accepted = min(proposals, key=lambda item: _score(item, support_seen))
+def generate_candidates(seed:int,budget:int)->list[list[int]]:
+    """Return exactly ``budget`` distinct monic integral octics."""
+    if isinstance(budget,bool) or not isinstance(budget,int):raise TypeError("budget must be an integer")
+    if budget<0:raise ValueError("budget must be nonnegative")
+    seen=set();inv=set();occ={};counts=[0]*10;answer=[]
+    for pos,(fam,local,target) in enumerate(_schedule(budget)):
+        picks=[]; loose=[]
+        for attempt in range(6 if fam==0 else 4):
+            lane=local if fam==0 else local+5;n=counts[lane];counts[lane]+=1;h=SHELLS[(pos+attempt+n//7)%len(SHELLS)]
+            if fam==0:
+                made=_cube_try(seed,lane,n,h)
+                if made is None:continue
+                poly,key=made
+                if key in inv:continue
+                sig=2*_sturm([poly[2*i] for i in range(5)],True)
+            else:
+                f=_quartic(seed,lane,n,h);b,c=_quad(seed,lane,n,h)
+                if b*b-4*c==0:continue
+                poly=_comp(f,b,c,(1,-1,2,-2)[(n+pos)%4]);key=("comp",lane,n)
+                sig=_sturm(f)*(2 if b*b-4*c>0 else 0)
+            if len(poly)!=9 or poly[-1]!=1 or not poly[0] or _canonical(poly) in seen:continue
+            ok,pat=_sieve(poly)
+            if not ok:continue
+            bucket=(fam,lane,sig,pat);score=(occ.get(bucket,0),max(abs(x) for x in poly[:-1]),sum(x!=0 for x in poly[:-1]))
+            (picks if sig==target else loose).append((score,poly,key,bucket))
+        # A failed signature cell transfers to its least-filled compatible
+        # bucket; this is preferable to consuming fallback capacity.
+        if not picks: picks=loose
+        if picks:
+            _,poly,key,bucket=min(picks,key=lambda x:x[0]);inv.add(key);occ[bucket]=occ.get(bucket,0)+1
         else:
-            accepted = _fallback_eisenstein(position + 1)
-
-        seen.add(tuple(accepted))
-        support_seen.add(tuple(i for i, value in enumerate(accepted[:-1]) if value))
-        output.append(accepted)
-    return output
+            serial=pos+1;poly=_fallback(serial)
+            while _canonical(poly) in seen:serial+=budget+1;poly=_fallback(serial)
+        seen.add(_canonical(poly));answer.append(poly)
+    return answer
