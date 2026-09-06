@@ -1,0 +1,1301 @@
+{
+  "degree": 8,
+  "groups": [
+    {
+      "group_order": 8,
+      "label": "8T1",
+      "transitive_number": 1,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 8,
+      "label": "8T2",
+      "transitive_number": 2,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 8,
+      "label": "8T3",
+      "transitive_number": 3,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 8,
+      "label": "8T4",
+      "transitive_number": 4,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 8,
+      "label": "8T5",
+      "transitive_number": 5,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T6",
+      "transitive_number": 6,
+      "valid_r": [
+        0,
+        2,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T7",
+      "transitive_number": 7,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T8",
+      "transitive_number": 8,
+      "valid_r": [
+        0,
+        2,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T9",
+      "transitive_number": 9,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T10",
+      "transitive_number": 10,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 16,
+      "label": "8T11",
+      "transitive_number": 11,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 24,
+      "label": "8T12",
+      "transitive_number": 12,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 24,
+      "label": "8T13",
+      "transitive_number": 13,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 24,
+      "label": "8T14",
+      "transitive_number": 14,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T15",
+      "transitive_number": 15,
+      "valid_r": [
+        0,
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T16",
+      "transitive_number": 16,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T17",
+      "transitive_number": 17,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T18",
+      "transitive_number": 18,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T19",
+      "transitive_number": 19,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T20",
+      "transitive_number": 20,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T21",
+      "transitive_number": 21,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 32,
+      "label": "8T22",
+      "transitive_number": 22,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 48,
+      "label": "8T23",
+      "transitive_number": 23,
+      "valid_r": [
+        0,
+        2,
+        8
+      ]
+    },
+    {
+      "group_order": 48,
+      "label": "8T24",
+      "transitive_number": 24,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 56,
+      "label": "8T25",
+      "transitive_number": 25,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T26",
+      "transitive_number": 26,
+      "valid_r": [
+        0,
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T27",
+      "transitive_number": 27,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T28",
+      "transitive_number": 28,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T29",
+      "transitive_number": 29,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T30",
+      "transitive_number": 30,
+      "valid_r": [
+        0,
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 64,
+      "label": "8T31",
+      "transitive_number": 31,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 96,
+      "label": "8T32",
+      "transitive_number": 32,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 96,
+      "label": "8T33",
+      "transitive_number": 33,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 96,
+      "label": "8T34",
+      "transitive_number": 34,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 128,
+      "label": "8T35",
+      "transitive_number": 35,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 168,
+      "label": "8T36",
+      "transitive_number": 36,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 168,
+      "label": "8T37",
+      "transitive_number": 37,
+      "valid_r": [
+        0,
+        8
+      ]
+    },
+    {
+      "group_order": 192,
+      "label": "8T38",
+      "transitive_number": 38,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 192,
+      "label": "8T39",
+      "transitive_number": 39,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 192,
+      "label": "8T40",
+      "transitive_number": 40,
+      "valid_r": [
+        0,
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 192,
+      "label": "8T41",
+      "transitive_number": 41,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 288,
+      "label": "8T42",
+      "transitive_number": 42,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 336,
+      "label": "8T43",
+      "transitive_number": 43,
+      "valid_r": [
+        0,
+        2,
+        8
+      ]
+    },
+    {
+      "group_order": 384,
+      "label": "8T44",
+      "transitive_number": 44,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 576,
+      "label": "8T45",
+      "transitive_number": 45,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 576,
+      "label": "8T46",
+      "transitive_number": 46,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 1152,
+      "label": "8T47",
+      "transitive_number": 47,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    },
+    {
+      "group_order": 1344,
+      "label": "8T48",
+      "transitive_number": 48,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 20160,
+      "label": "8T49",
+      "transitive_number": 49,
+      "valid_r": [
+        0,
+        4,
+        8
+      ]
+    },
+    {
+      "group_order": 40320,
+      "label": "8T50",
+      "transitive_number": 50,
+      "valid_r": [
+        0,
+        2,
+        4,
+        6,
+        8
+      ]
+    }
+  ],
+  "number_of_groups": 50,
+  "number_of_pairs": 157,
+  "pairs": [
+    {
+      "galois_group": "8T1",
+      "real_roots": 0,
+      "transitive_number": 1
+    },
+    {
+      "galois_group": "8T1",
+      "real_roots": 8,
+      "transitive_number": 1
+    },
+    {
+      "galois_group": "8T2",
+      "real_roots": 0,
+      "transitive_number": 2
+    },
+    {
+      "galois_group": "8T2",
+      "real_roots": 8,
+      "transitive_number": 2
+    },
+    {
+      "galois_group": "8T3",
+      "real_roots": 0,
+      "transitive_number": 3
+    },
+    {
+      "galois_group": "8T3",
+      "real_roots": 8,
+      "transitive_number": 3
+    },
+    {
+      "galois_group": "8T4",
+      "real_roots": 0,
+      "transitive_number": 4
+    },
+    {
+      "galois_group": "8T4",
+      "real_roots": 8,
+      "transitive_number": 4
+    },
+    {
+      "galois_group": "8T5",
+      "real_roots": 0,
+      "transitive_number": 5
+    },
+    {
+      "galois_group": "8T5",
+      "real_roots": 8,
+      "transitive_number": 5
+    },
+    {
+      "galois_group": "8T6",
+      "real_roots": 0,
+      "transitive_number": 6
+    },
+    {
+      "galois_group": "8T6",
+      "real_roots": 2,
+      "transitive_number": 6
+    },
+    {
+      "galois_group": "8T6",
+      "real_roots": 8,
+      "transitive_number": 6
+    },
+    {
+      "galois_group": "8T7",
+      "real_roots": 0,
+      "transitive_number": 7
+    },
+    {
+      "galois_group": "8T7",
+      "real_roots": 4,
+      "transitive_number": 7
+    },
+    {
+      "galois_group": "8T7",
+      "real_roots": 8,
+      "transitive_number": 7
+    },
+    {
+      "galois_group": "8T8",
+      "real_roots": 0,
+      "transitive_number": 8
+    },
+    {
+      "galois_group": "8T8",
+      "real_roots": 2,
+      "transitive_number": 8
+    },
+    {
+      "galois_group": "8T8",
+      "real_roots": 8,
+      "transitive_number": 8
+    },
+    {
+      "galois_group": "8T9",
+      "real_roots": 0,
+      "transitive_number": 9
+    },
+    {
+      "galois_group": "8T9",
+      "real_roots": 4,
+      "transitive_number": 9
+    },
+    {
+      "galois_group": "8T9",
+      "real_roots": 8,
+      "transitive_number": 9
+    },
+    {
+      "galois_group": "8T10",
+      "real_roots": 0,
+      "transitive_number": 10
+    },
+    {
+      "galois_group": "8T10",
+      "real_roots": 4,
+      "transitive_number": 10
+    },
+    {
+      "galois_group": "8T10",
+      "real_roots": 8,
+      "transitive_number": 10
+    },
+    {
+      "galois_group": "8T11",
+      "real_roots": 0,
+      "transitive_number": 11
+    },
+    {
+      "galois_group": "8T11",
+      "real_roots": 4,
+      "transitive_number": 11
+    },
+    {
+      "galois_group": "8T11",
+      "real_roots": 8,
+      "transitive_number": 11
+    },
+    {
+      "galois_group": "8T12",
+      "real_roots": 0,
+      "transitive_number": 12
+    },
+    {
+      "galois_group": "8T12",
+      "real_roots": 8,
+      "transitive_number": 12
+    },
+    {
+      "galois_group": "8T13",
+      "real_roots": 0,
+      "transitive_number": 13
+    },
+    {
+      "galois_group": "8T13",
+      "real_roots": 8,
+      "transitive_number": 13
+    },
+    {
+      "galois_group": "8T14",
+      "real_roots": 0,
+      "transitive_number": 14
+    },
+    {
+      "galois_group": "8T14",
+      "real_roots": 8,
+      "transitive_number": 14
+    },
+    {
+      "galois_group": "8T15",
+      "real_roots": 0,
+      "transitive_number": 15
+    },
+    {
+      "galois_group": "8T15",
+      "real_roots": 2,
+      "transitive_number": 15
+    },
+    {
+      "galois_group": "8T15",
+      "real_roots": 4,
+      "transitive_number": 15
+    },
+    {
+      "galois_group": "8T15",
+      "real_roots": 8,
+      "transitive_number": 15
+    },
+    {
+      "galois_group": "8T16",
+      "real_roots": 0,
+      "transitive_number": 16
+    },
+    {
+      "galois_group": "8T16",
+      "real_roots": 4,
+      "transitive_number": 16
+    },
+    {
+      "galois_group": "8T16",
+      "real_roots": 8,
+      "transitive_number": 16
+    },
+    {
+      "galois_group": "8T17",
+      "real_roots": 0,
+      "transitive_number": 17
+    },
+    {
+      "galois_group": "8T17",
+      "real_roots": 4,
+      "transitive_number": 17
+    },
+    {
+      "galois_group": "8T17",
+      "real_roots": 8,
+      "transitive_number": 17
+    },
+    {
+      "galois_group": "8T18",
+      "real_roots": 0,
+      "transitive_number": 18
+    },
+    {
+      "galois_group": "8T18",
+      "real_roots": 4,
+      "transitive_number": 18
+    },
+    {
+      "galois_group": "8T18",
+      "real_roots": 8,
+      "transitive_number": 18
+    },
+    {
+      "galois_group": "8T19",
+      "real_roots": 0,
+      "transitive_number": 19
+    },
+    {
+      "galois_group": "8T19",
+      "real_roots": 4,
+      "transitive_number": 19
+    },
+    {
+      "galois_group": "8T19",
+      "real_roots": 8,
+      "transitive_number": 19
+    },
+    {
+      "galois_group": "8T20",
+      "real_roots": 0,
+      "transitive_number": 20
+    },
+    {
+      "galois_group": "8T20",
+      "real_roots": 4,
+      "transitive_number": 20
+    },
+    {
+      "galois_group": "8T20",
+      "real_roots": 8,
+      "transitive_number": 20
+    },
+    {
+      "galois_group": "8T21",
+      "real_roots": 0,
+      "transitive_number": 21
+    },
+    {
+      "galois_group": "8T21",
+      "real_roots": 4,
+      "transitive_number": 21
+    },
+    {
+      "galois_group": "8T21",
+      "real_roots": 8,
+      "transitive_number": 21
+    },
+    {
+      "galois_group": "8T22",
+      "real_roots": 0,
+      "transitive_number": 22
+    },
+    {
+      "galois_group": "8T22",
+      "real_roots": 4,
+      "transitive_number": 22
+    },
+    {
+      "galois_group": "8T22",
+      "real_roots": 8,
+      "transitive_number": 22
+    },
+    {
+      "galois_group": "8T23",
+      "real_roots": 0,
+      "transitive_number": 23
+    },
+    {
+      "galois_group": "8T23",
+      "real_roots": 2,
+      "transitive_number": 23
+    },
+    {
+      "galois_group": "8T23",
+      "real_roots": 8,
+      "transitive_number": 23
+    },
+    {
+      "galois_group": "8T24",
+      "real_roots": 0,
+      "transitive_number": 24
+    },
+    {
+      "galois_group": "8T24",
+      "real_roots": 4,
+      "transitive_number": 24
+    },
+    {
+      "galois_group": "8T24",
+      "real_roots": 8,
+      "transitive_number": 24
+    },
+    {
+      "galois_group": "8T25",
+      "real_roots": 0,
+      "transitive_number": 25
+    },
+    {
+      "galois_group": "8T25",
+      "real_roots": 8,
+      "transitive_number": 25
+    },
+    {
+      "galois_group": "8T26",
+      "real_roots": 0,
+      "transitive_number": 26
+    },
+    {
+      "galois_group": "8T26",
+      "real_roots": 2,
+      "transitive_number": 26
+    },
+    {
+      "galois_group": "8T26",
+      "real_roots": 4,
+      "transitive_number": 26
+    },
+    {
+      "galois_group": "8T26",
+      "real_roots": 8,
+      "transitive_number": 26
+    },
+    {
+      "galois_group": "8T27",
+      "real_roots": 0,
+      "transitive_number": 27
+    },
+    {
+      "galois_group": "8T27",
+      "real_roots": 2,
+      "transitive_number": 27
+    },
+    {
+      "galois_group": "8T27",
+      "real_roots": 4,
+      "transitive_number": 27
+    },
+    {
+      "galois_group": "8T27",
+      "real_roots": 6,
+      "transitive_number": 27
+    },
+    {
+      "galois_group": "8T27",
+      "real_roots": 8,
+      "transitive_number": 27
+    },
+    {
+      "galois_group": "8T28",
+      "real_roots": 0,
+      "transitive_number": 28
+    },
+    {
+      "galois_group": "8T28",
+      "real_roots": 4,
+      "transitive_number": 28
+    },
+    {
+      "galois_group": "8T28",
+      "real_roots": 8,
+      "transitive_number": 28
+    },
+    {
+      "galois_group": "8T29",
+      "real_roots": 0,
+      "transitive_number": 29
+    },
+    {
+      "galois_group": "8T29",
+      "real_roots": 4,
+      "transitive_number": 29
+    },
+    {
+      "galois_group": "8T29",
+      "real_roots": 8,
+      "transitive_number": 29
+    },
+    {
+      "galois_group": "8T30",
+      "real_roots": 0,
+      "transitive_number": 30
+    },
+    {
+      "galois_group": "8T30",
+      "real_roots": 2,
+      "transitive_number": 30
+    },
+    {
+      "galois_group": "8T30",
+      "real_roots": 4,
+      "transitive_number": 30
+    },
+    {
+      "galois_group": "8T30",
+      "real_roots": 8,
+      "transitive_number": 30
+    },
+    {
+      "galois_group": "8T31",
+      "real_roots": 0,
+      "transitive_number": 31
+    },
+    {
+      "galois_group": "8T31",
+      "real_roots": 2,
+      "transitive_number": 31
+    },
+    {
+      "galois_group": "8T31",
+      "real_roots": 4,
+      "transitive_number": 31
+    },
+    {
+      "galois_group": "8T31",
+      "real_roots": 6,
+      "transitive_number": 31
+    },
+    {
+      "galois_group": "8T31",
+      "real_roots": 8,
+      "transitive_number": 31
+    },
+    {
+      "galois_group": "8T32",
+      "real_roots": 0,
+      "transitive_number": 32
+    },
+    {
+      "galois_group": "8T32",
+      "real_roots": 4,
+      "transitive_number": 32
+    },
+    {
+      "galois_group": "8T32",
+      "real_roots": 8,
+      "transitive_number": 32
+    },
+    {
+      "galois_group": "8T33",
+      "real_roots": 0,
+      "transitive_number": 33
+    },
+    {
+      "galois_group": "8T33",
+      "real_roots": 4,
+      "transitive_number": 33
+    },
+    {
+      "galois_group": "8T33",
+      "real_roots": 8,
+      "transitive_number": 33
+    },
+    {
+      "galois_group": "8T34",
+      "real_roots": 0,
+      "transitive_number": 34
+    },
+    {
+      "galois_group": "8T34",
+      "real_roots": 4,
+      "transitive_number": 34
+    },
+    {
+      "galois_group": "8T34",
+      "real_roots": 8,
+      "transitive_number": 34
+    },
+    {
+      "galois_group": "8T35",
+      "real_roots": 0,
+      "transitive_number": 35
+    },
+    {
+      "galois_group": "8T35",
+      "real_roots": 2,
+      "transitive_number": 35
+    },
+    {
+      "galois_group": "8T35",
+      "real_roots": 4,
+      "transitive_number": 35
+    },
+    {
+      "galois_group": "8T35",
+      "real_roots": 6,
+      "transitive_number": 35
+    },
+    {
+      "galois_group": "8T35",
+      "real_roots": 8,
+      "transitive_number": 35
+    },
+    {
+      "galois_group": "8T36",
+      "real_roots": 0,
+      "transitive_number": 36
+    },
+    {
+      "galois_group": "8T36",
+      "real_roots": 8,
+      "transitive_number": 36
+    },
+    {
+      "galois_group": "8T37",
+      "real_roots": 0,
+      "transitive_number": 37
+    },
+    {
+      "galois_group": "8T37",
+      "real_roots": 8,
+      "transitive_number": 37
+    },
+    {
+      "galois_group": "8T38",
+      "real_roots": 0,
+      "transitive_number": 38
+    },
+    {
+      "galois_group": "8T38",
+      "real_roots": 2,
+      "transitive_number": 38
+    },
+    {
+      "galois_group": "8T38",
+      "real_roots": 4,
+      "transitive_number": 38
+    },
+    {
+      "galois_group": "8T38",
+      "real_roots": 6,
+      "transitive_number": 38
+    },
+    {
+      "galois_group": "8T38",
+      "real_roots": 8,
+      "transitive_number": 38
+    },
+    {
+      "galois_group": "8T39",
+      "real_roots": 0,
+      "transitive_number": 39
+    },
+    {
+      "galois_group": "8T39",
+      "real_roots": 4,
+      "transitive_number": 39
+    },
+    {
+      "galois_group": "8T39",
+      "real_roots": 8,
+      "transitive_number": 39
+    },
+    {
+      "galois_group": "8T40",
+      "real_roots": 0,
+      "transitive_number": 40
+    },
+    {
+      "galois_group": "8T40",
+      "real_roots": 2,
+      "transitive_number": 40
+    },
+    {
+      "galois_group": "8T40",
+      "real_roots": 4,
+      "transitive_number": 40
+    },
+    {
+      "galois_group": "8T40",
+      "real_roots": 8,
+      "transitive_number": 40
+    },
+    {
+      "galois_group": "8T41",
+      "real_roots": 0,
+      "transitive_number": 41
+    },
+    {
+      "galois_group": "8T41",
+      "real_roots": 4,
+      "transitive_number": 41
+    },
+    {
+      "galois_group": "8T41",
+      "real_roots": 8,
+      "transitive_number": 41
+    },
+    {
+      "galois_group": "8T42",
+      "real_roots": 0,
+      "transitive_number": 42
+    },
+    {
+      "galois_group": "8T42",
+      "real_roots": 4,
+      "transitive_number": 42
+    },
+    {
+      "galois_group": "8T42",
+      "real_roots": 8,
+      "transitive_number": 42
+    },
+    {
+      "galois_group": "8T43",
+      "real_roots": 0,
+      "transitive_number": 43
+    },
+    {
+      "galois_group": "8T43",
+      "real_roots": 2,
+      "transitive_number": 43
+    },
+    {
+      "galois_group": "8T43",
+      "real_roots": 8,
+      "transitive_number": 43
+    },
+    {
+      "galois_group": "8T44",
+      "real_roots": 0,
+      "transitive_number": 44
+    },
+    {
+      "galois_group": "8T44",
+      "real_roots": 2,
+      "transitive_number": 44
+    },
+    {
+      "galois_group": "8T44",
+      "real_roots": 4,
+      "transitive_number": 44
+    },
+    {
+      "galois_group": "8T44",
+      "real_roots": 6,
+      "transitive_number": 44
+    },
+    {
+      "galois_group": "8T44",
+      "real_roots": 8,
+      "transitive_number": 44
+    },
+    {
+      "galois_group": "8T45",
+      "real_roots": 0,
+      "transitive_number": 45
+    },
+    {
+      "galois_group": "8T45",
+      "real_roots": 4,
+      "transitive_number": 45
+    },
+    {
+      "galois_group": "8T45",
+      "real_roots": 8,
+      "transitive_number": 45
+    },
+    {
+      "galois_group": "8T46",
+      "real_roots": 0,
+      "transitive_number": 46
+    },
+    {
+      "galois_group": "8T46",
+      "real_roots": 4,
+      "transitive_number": 46
+    },
+    {
+      "galois_group": "8T46",
+      "real_roots": 8,
+      "transitive_number": 46
+    },
+    {
+      "galois_group": "8T47",
+      "real_roots": 0,
+      "transitive_number": 47
+    },
+    {
+      "galois_group": "8T47",
+      "real_roots": 2,
+      "transitive_number": 47
+    },
+    {
+      "galois_group": "8T47",
+      "real_roots": 4,
+      "transitive_number": 47
+    },
+    {
+      "galois_group": "8T47",
+      "real_roots": 6,
+      "transitive_number": 47
+    },
+    {
+      "galois_group": "8T47",
+      "real_roots": 8,
+      "transitive_number": 47
+    },
+    {
+      "galois_group": "8T48",
+      "real_roots": 0,
+      "transitive_number": 48
+    },
+    {
+      "galois_group": "8T48",
+      "real_roots": 4,
+      "transitive_number": 48
+    },
+    {
+      "galois_group": "8T48",
+      "real_roots": 8,
+      "transitive_number": 48
+    },
+    {
+      "galois_group": "8T49",
+      "real_roots": 0,
+      "transitive_number": 49
+    },
+    {
+      "galois_group": "8T49",
+      "real_roots": 4,
+      "transitive_number": 49
+    },
+    {
+      "galois_group": "8T49",
+      "real_roots": 8,
+      "transitive_number": 49
+    },
+    {
+      "galois_group": "8T50",
+      "real_roots": 0,
+      "transitive_number": 50
+    },
+    {
+      "galois_group": "8T50",
+      "real_roots": 2,
+      "transitive_number": 50
+    },
+    {
+      "galois_group": "8T50",
+      "real_roots": 4,
+      "transitive_number": 50
+    },
+    {
+      "galois_group": "8T50",
+      "real_roots": 6,
+      "transitive_number": 50
+    },
+    {
+      "galois_group": "8T50",
+      "real_roots": 8,
+      "transitive_number": 50
+    }
+  ]
+}

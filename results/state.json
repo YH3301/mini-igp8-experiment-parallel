@@ -1,0 +1,15 @@
+{
+  "accepted_solver_commit": null,
+  "discriminant_improvements_total": 0,
+  "generation_feedback": null,
+  "incumbent_benchmark": null,
+  "incumbent_solver_hash": null,
+  "last_new_pair_at": 0,
+  "last_solver_change_at": 0,
+  "last_stop_code": "not_started",
+  "next_generation": 0,
+  "next_search_batch": 0,
+  "run_id": null,
+  "search_candidates_total": 0,
+  "version": 5
+}
