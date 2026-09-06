@@ -270,49 +270,118 @@ def _portfolio_quotas(n:int)->list[int]:
     w=[30,30,25,15];q=[n*x//100 for x in w]
     for i in sorted(range(4),key=lambda i:(-(n*w[i]%100),i))[:n-sum(q)]:q[i]+=1
     return q
+def _tower_product(x:int,y:int,a:int,b0:int,b1:int,c0:int,c1:int,c2:int,c3:int)->list[int]:
+    """Product of two basis monomials in [1,u,v,uv,w,uw,vw,uvw]."""
+    # Terms are exponent triples (u,v,w).  Reducing w, then v, then u is a
+    # particularly small exact implementation of the integral tower basis.
+    terms={( (x&1)+(y&1), ((x>>1)&1)+((y>>1)&1), ((x>>2)&1)+((y>>2)&1)):1}
+    rel=(((a,0,0),), ((b0,0,0),(b1,1,0)),
+         ((c0,0,0),(c1,1,0),(c2,0,1),(c3,1,1)))
+    for level in (2,1,0):
+        while any(e[level]>=2 for e in terms):
+            nxt={}
+            for e,z in terms.items():
+                if e[level]<2:
+                    nxt[e]=nxt.get(e,0)+z;continue
+                base=list(e);base[level]-=2
+                for r,du,dv in rel[level]:
+                    q=(base[0]+du,base[1]+dv,base[2])
+                    nxt[q]=nxt.get(q,0)+z*r
+            terms=nxt
+    out=[0]*8
+    for (eu,ev,ew),z in terms.items():out[eu+2*ev+4*ew]+=z
+    return out
+
+def _tower_char(theta:list[int],pars:tuple[int,int,int,int,int,int,int])->list[int]:
+    a,b0,b1,c0,c1,c2,c3=pars
+    m=[]
+    for j in range(8):
+        col=[0]*8
+        for i,t in enumerate(theta):
+            if t:
+                q=_tower_product(i,j,a,b0,b1,c0,c1,c2,c3)
+                for k,v in enumerate(q):col[k]+=t*v
+        m.append(col)
+    # Faddeev--LeVerrier, using columns.  All divisions are exact over Z.
+    b=[r[:] for r in m];cs=[1]
+    for k in range(1,9):
+        tr=sum(b[i][i] for i in range(8));c=-tr//k
+        if tr%k:return []
+        cs.append(c)
+        if k<8:
+            for i in range(8):b[i][i]+=c
+            b=[[sum(m[r][t]*b[t][s] for t in range(8)) for s in range(8)] for r in range(8)]
+    return list(reversed(cs))
+
+def _tower_tuple(seed:int,lane:int,n:int,h:int)->tuple[tuple[int,...],list[int]]|None:
+    s=lambda i:_signed(seed,140+lane,n,i,h)
+    # The two norm lanes are parametrised, rather than rejected into rarity.
+    # In lane 1: b0^2-a*b1^2 is a square; in lane 2 it is a times a square.
+    r=s(0) or 1; t=s(1) or 1
+    if lane==1:
+        x=2*r+(n&1); y=2*t+(n&1); a=x*y; b0=(x+y)//2; b1=1
+    elif lane==2:
+        a=r*r+t*t; b0=a; b1=r
+    else:
+        a=s(0) or 2; b0=s(1); b1=s(2) or 1
+    if a in (0,1) or int(abs(a)**0.5)**2==abs(a):return None
+    if b0*b0-a*b1*b1==0:return None
+    # The fourth lane fixes simple trace/conjugate-pair relations in K1;
+    # the other lanes retain generic final radicands.
+    if lane==3:
+        c0=s(3) or 1;c1=0;c2=s(4) or 1;c3=-c2 if n&1 else c2
+    else:
+        c0=s(3) or 1;c1=s(4);c2=s(5);c3=s(6)
+    # Keep the third extension genuinely over K2, rather than silently
+    # collapsing the final radicand back into K1.
+    if c0==c1==c2==c3==0 or (c2==0 and c3==0):return None
+    lam=s(7);mu=s(8);nu=s(9)
+    theta=[0,mu,lam,nu,1,0,0,0] # w + lambda v + mu u + nu uv
+    return (a,b0,b1,c0,c1,c2,c3),theta
+
+def _tower_no_rational_factor(poly:list[int])->bool:
+    """Reject when all usable good-prime patterns allow a proper Q-factor."""
+    possible=set(range(1,5));usable=0
+    for p in PRIMES:
+        ds=_degrees(poly,p)
+        if ds is None:continue
+        usable+=1;sums={0}
+        for d in ds:sums|={x+d for x in tuple(sums)}
+        possible&=sums
+    return usable>0 and not possible
+
 def generate_candidates(seed:int,budget:int)->list[list[int]]:
-    """Exactly ``budget`` unique monic octics, selected by local maximin data."""
+    """Exactly ``budget`` deterministic, distinct monic octics from towers."""
     if isinstance(budget,bool) or not isinstance(budget,int):raise TypeError("budget must be an integer")
     if budget<0:raise ValueError("budget must be nonnegative")
-    if not budget:return []
-    q=_portfolio_quotas(budget);makers=(_portfolio_recip,_portfolio_tree,_portfolio_critical,_portfolio_eis)
-    pools=[[] for _ in range(4)];seen=set()
-    for lane,maker in enumerate(makers):
-        # A fixed extra shell is enough for maximin choice while keeping exact
-        # resultant computation linear and comfortable at 2,000 outputs.
-        target=max(q[lane]+12,12)
-        for n in range(target*4):
-            f=maker(seed,n,SHELLS[(n+3*lane)%len(SHELLS)])
-            if len(f)!=9 or f[-1]!=1 or not f[0] or _canonical(f) in seen:continue
-            ok,_=_sieve(f)
-            if not ok:continue
-            disc=_portfolio_disc(f)
-            if not disc:continue
-            seen.add(_canonical(f));pools[lane].append((f,_portfolio_fp(f,lane,disc),disc))
-            if len(pools[lane])>=target:break
-        # Bounded structural shells can be singular; a lane-labelled
-        # Eisenstein completion preserves the exact-size contract.
-        n=0
-        while len(pools[lane])<max(q[lane],1):
-            f=_portfolio_eis(seed+lane*1009,n,2+n%7);n+=1
-            if _canonical(f) in seen:continue
-            seen.add(_canonical(f));d=_portfolio_disc(f);pools[lane].append((f,_portfolio_fp(f,lane,d),d))
-    chosen=[];used={}
-    for lane,count in enumerate(q):
-        available=pools[lane][:]
-        # Cache each candidate's nearest selected fingerprint.  Recomputing
-        # the full minimum inside every comparison becomes quadratic-cubic at
-        # large budgets; this update is the same greedy maximin rule.
-        nearest={id(x):min((_portfolio_distance(x[1],y[1]) for y in chosen),default=99) for x in available}
-        for _ in range(count):
-            def score(x):
-                f,fp,d=x;return (nearest[id(x)],-used.get(fp,0),d.bit_length(),-max(abs(v) for v in f[:-1]))
-            x=max(available,key=score);available.remove(x);chosen.append(x);used[x[1]]=used.get(x[1],0)+1
-            for y in available:nearest[id(y)]=min(nearest[id(y)],_portfolio_distance(y[1],x[1]))
-    by=[[] for _ in range(4)]
-    for f,fp,d in chosen:by[fp[3]].append(f)
-    out=[]
-    while any(by):
-        for row in by:
-            if row:out.append(row.pop(0))
-    return out
+    answer=[];seen=set();serial=[0]*4
+    # Round-robin gives four equal sublanes to within one element.
+    for pos in range(budget):
+        lane=pos%4; chosen=None
+        # Fixed work cap: shells expand geometrically, and every retry is fresh.
+        for attempt in range(28):
+            n=serial[lane];serial[lane]+=1
+            h=SHELLS[min(len(SHELLS)-1,(n//4+attempt//9)%len(SHELLS))]
+            made=_tower_tuple(seed,lane,n,h)
+            if made is None:continue
+            pars,theta=made;poly=_tower_char(theta,pars)
+            if len(poly)!=9 or poly[-1]!=1 or not poly[0] or _canonical(poly) in seen:continue
+            # Squarefree good-prime reductions certify nonzero discriminant;
+            # require their factor degrees to rule out every rational degree.
+            if not _tower_no_rational_factor(poly):continue
+            chosen=poly;break
+        # A constrained cell may be sparse.  Its documented completion is a
+        # fresh unconstrained tower tuple, never a catalogue polynomial.
+        if chosen is None:
+            for attempt in range(48):
+                n=serial[0];serial[0]+=1;made=_tower_tuple(seed,0,n,SHELLS[(n+attempt)%len(SHELLS)])
+                if made is None:continue
+                pars,theta=made;poly=_tower_char(theta,pars)
+                if len(poly)==9 and poly[-1]==1 and poly[0] and _canonical(poly) not in seen:
+                    chosen=poly;break
+        if chosen is None: # unreachable in normal shells, retains totality.
+            k=pos+1
+            chosen=[2*k+1,0,0,0,0,0,0,0,1]
+            while _canonical(chosen) in seen:k+=budget+1;chosen=[2*k+1,0,0,0,0,0,0,0,1]
+        seen.add(_canonical(chosen));answer.append(chosen)
+    return answer
