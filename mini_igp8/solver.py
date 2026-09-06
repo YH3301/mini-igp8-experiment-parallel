@@ -200,3 +200,119 @@ def generate_candidates(seed:int,budget:int)->list[list[int]]:
             while _canonical(poly) in seen:serial+=budget+1;poly=_fallback(serial)
         seen.add(_canonical(poly));answer.append(poly)
     return answer
+
+# Local-global diversity portfolio.  This definition intentionally replaces the
+# earlier orbit round-robin above while retaining its small finite-field engine.
+def _portfolio_compose(a:list[int],b:list[int])->list[int]:
+    z=[0]
+    for c in reversed(a):z=_add(_mul(z,b),[c])
+    return z
+def _portfolio_recip(seed:int,n:int,h:int)->list[int]:
+    s=lambda i:_signed(seed,71,n,i,h);g=[s(0) or 1,s(1),s(2),s(3),1];z=[0]*9
+    for d,c in enumerate(g):
+        for j in range(d+1):z[4+d-2*j]+=c*comb(d,j)
+    return z
+def _portfolio_tree(seed:int,n:int,h:int)->list[int]:
+    qs=[]
+    for j in range(3):
+        b=_signed(seed,80+j,n,0,max(1,h//2));c=_signed(seed,80+j,n,1,h)
+        if (n+j)%5==0:c=b*b//4+1+abs(_signed(seed,84+j,n,2,h))
+        qs.append([c,b,1])
+    f=_portfolio_compose(qs[1],qs[2]);f=_portfolio_compose(qs[0],f)
+    f[0]-=_signed(seed,88,n,0,h) or 1
+    return f
+def _portfolio_critical(seed:int,n:int,h:int)->list[int]:
+    # f'=8*x*q^2.  A cubic q is required for a degree-eight integral f.
+    # q=[5u,0,21v,1] meets every denominator condition in the integral:
+    # 3|q0*q1, 5|(q0+q1*q2), 3|(q2^2+2q1), and 7|q2.
+    s=lambda i:_signed(seed,90,n,i,h);q=[5*(s(0) or 1),0,21*s(2),1];qq=_mul(q,q);f=[0]*9
+    for i,v in enumerate(qq):
+        d=i+2
+        if 8*v%d:return []
+        f[d]=8*v//d
+    # Res(f',f)=8^8*f(0)*Norm_q(f)^2.  Thus this square integration
+    # constant makes the (nonzero) polynomial discriminant a square.
+    u=1+_word(seed,91,n,0)%(h+3);f[0]=u*u
+    return f
+def _portfolio_eis(seed:int,n:int,h:int)->list[int]:
+    p=(2,3,5)[n%3];s=lambda i:_signed(seed,100,n,i,h);a=[p*s(i) for i in range(8)]+[1]
+    u=s(0) or 1
+    if u%p==0:u+=1
+    a[0]=p*u;return a
+def _portfolio_det(m:list[list[int]])->int:
+    old=1;sign=1
+    for k in range(len(m)-1):
+        if not m[k][k]:
+            r=next((r for r in range(k+1,len(m)) if m[r][k]),None)
+            if r is None:return 0
+            m[k],m[r]=m[r],m[k];sign=-sign
+        piv=m[k][k]
+        for i in range(k+1,len(m)):
+            for j in range(k+1,len(m)):m[i][j]=(m[i][j]*piv-m[i][k]*m[k][j])//old
+        old=piv
+        for i in range(k+1,len(m)):m[i][k]=0
+    return sign*m[-1][-1]
+def _portfolio_disc(f:list[int])->int:
+    d=[i*f[i] for i in range(1,9)];m=[]
+    for r in range(7):m.append([0]*r+list(reversed(f))+[0]*(6-r))
+    for r in range(8):m.append([0]*r+list(reversed(d))+[0]*(7-r))
+    return abs(_portfolio_det(m))
+def _portfolio_v(n:int,p:int)->int:
+    k=0
+    while n and n%p==0:k+=1;n//=p
+    return k
+def _portfolio_fp(f:list[int],lane:int,disc:int)->tuple:
+    parts=tuple(tuple(x) if x is not None else () for x in (_degrees(f,p) for p in PRIMES))
+    return (_sturm(f),parts,tuple(min(5,_portfolio_v(disc,p)) for p in (2,3,5,7,11)),lane)
+def _portfolio_distance(a:tuple,b:tuple)->int:
+    return 3*(a[0]!=b[0])+sum(2 for x,y in zip(a[1],b[1]) if x!=y)+sum(x!=y for x,y in zip(a[2],b[2]))+(a[3]!=b[3])
+def _portfolio_quotas(n:int)->list[int]:
+    w=[30,30,25,15];q=[n*x//100 for x in w]
+    for i in sorted(range(4),key=lambda i:(-(n*w[i]%100),i))[:n-sum(q)]:q[i]+=1
+    return q
+def generate_candidates(seed:int,budget:int)->list[list[int]]:
+    """Exactly ``budget`` unique monic octics, selected by local maximin data."""
+    if isinstance(budget,bool) or not isinstance(budget,int):raise TypeError("budget must be an integer")
+    if budget<0:raise ValueError("budget must be nonnegative")
+    if not budget:return []
+    q=_portfolio_quotas(budget);makers=(_portfolio_recip,_portfolio_tree,_portfolio_critical,_portfolio_eis)
+    pools=[[] for _ in range(4)];seen=set()
+    for lane,maker in enumerate(makers):
+        # A fixed extra shell is enough for maximin choice while keeping exact
+        # resultant computation linear and comfortable at 2,000 outputs.
+        target=max(q[lane]+12,12)
+        for n in range(target*4):
+            f=maker(seed,n,SHELLS[(n+3*lane)%len(SHELLS)])
+            if len(f)!=9 or f[-1]!=1 or not f[0] or _canonical(f) in seen:continue
+            ok,_=_sieve(f)
+            if not ok:continue
+            disc=_portfolio_disc(f)
+            if not disc:continue
+            seen.add(_canonical(f));pools[lane].append((f,_portfolio_fp(f,lane,disc),disc))
+            if len(pools[lane])>=target:break
+        # Bounded structural shells can be singular; a lane-labelled
+        # Eisenstein completion preserves the exact-size contract.
+        n=0
+        while len(pools[lane])<max(q[lane],1):
+            f=_portfolio_eis(seed+lane*1009,n,2+n%7);n+=1
+            if _canonical(f) in seen:continue
+            seen.add(_canonical(f));d=_portfolio_disc(f);pools[lane].append((f,_portfolio_fp(f,lane,d),d))
+    chosen=[];used={}
+    for lane,count in enumerate(q):
+        available=pools[lane][:]
+        # Cache each candidate's nearest selected fingerprint.  Recomputing
+        # the full minimum inside every comparison becomes quadratic-cubic at
+        # large budgets; this update is the same greedy maximin rule.
+        nearest={id(x):min((_portfolio_distance(x[1],y[1]) for y in chosen),default=99) for x in available}
+        for _ in range(count):
+            def score(x):
+                f,fp,d=x;return (nearest[id(x)],-used.get(fp,0),d.bit_length(),-max(abs(v) for v in f[:-1]))
+            x=max(available,key=score);available.remove(x);chosen.append(x);used[x[1]]=used.get(x[1],0)+1
+            for y in available:nearest[id(y)]=min(nearest[id(y)],_portfolio_distance(y[1],x[1]))
+    by=[[] for _ in range(4)]
+    for f,fp,d in chosen:by[fp[3]].append(f)
+    out=[]
+    while any(by):
+        for row in by:
+            if row:out.append(row.pop(0))
+    return out
