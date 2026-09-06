@@ -1,15 +1,27 @@
 {
-  "accepted_solver_commit": null,
-  "discriminant_improvements_total": 0,
+  "accepted_solver_commit": "3e5ae5aac772e8ca5ad7218763b2f87d7c74188a",
+  "discriminant_improvements_total": 7,
   "generation_feedback": null,
-  "incumbent_benchmark": null,
-  "incumbent_solver_hash": null,
-  "last_new_pair_at": 0,
+  "incumbent_benchmark": {
+    "candidate_slots": 2000,
+    "groups": 1,
+    "pairs": 4,
+    "sage_calls": 2000,
+    "score": 4010.974,
+    "status_counts": {
+      "reducible": 52,
+      "verified": 1948
+    },
+    "verified": 1948,
+    "verified_fraction": 0.974
+  },
+  "incumbent_solver_hash": "e124bbc3972aed4a62f3cf8b0fe5994e6ff9ed341d4162c10c731b96fab34ac8",
+  "last_new_pair_at": 1000,
   "last_solver_change_at": 0,
-  "last_stop_code": "not_started",
-  "next_generation": 0,
-  "next_search_batch": 0,
-  "run_id": null,
-  "search_candidates_total": 0,
+  "last_stop_code": "research_infrastructure_failure",
+  "next_generation": 1,
+  "next_search_batch": 6,
+  "run_id": "78cf9bf6202f",
+  "search_candidates_total": 6000,
   "version": 5
 }
