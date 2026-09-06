@@ -1,46 +1,43 @@
 {
-  "accepted_solver_commit": "26be6d9b6a4a0e87824df47d2d584d5e36454f93",
-  "discriminant_improvements_total": 112,
+  "accepted_solver_commit": "17c37b95a32a427f10c37c0792701979f3ca805b",
+  "discriminant_improvements_total": 119,
   "generation_feedback": {
     "avoid": [
-      "Treating screen or preliminary scores as sufficient evidence when seed-consistency validation fails, as in D.",
-      "Expanding S with additional families before measuring overlap and marginal yield within its two existing branches.",
-      "Returning to narrow single-geometry proposals such as A, C, or E without a demonstrated complementary lane.",
-      "Assuming that signature targeting alone will improve catalogue coverage without benchmark evidence, as B did not reach that stage.",
-      "Claiming discriminant progress from blank fields or from the inconsistent prior summary; the reported benchmarked candidates show zero improvements where values are present.",
-      "Inferring the identities of hidden seeds, groups, or group\u2013signature pairs from aggregate counts."
+      "Treating higher raw benchmark scores for D or E as evidence that they outperformed A on the stated discovery objective.",
+      "Claiming B or C failed algebraically when both were pruned before benchmark evaluation.",
+      "Using S as evidence for or against its portfolio hypothesis; the solver process failed.",
+      "Repeating the previous generation\u2019s E-centered diagnosis or its incompatible metrics.",
+      "Inferring any hidden seed or group-signature identities from aggregate counts.",
+      "Scaling A indiscriminately without measuring verification rate, runtime, and marginal novelty after deduplication."
     ],
-    "diagnosis": "S won because it converted the strongest ideas from A and E into one coherent orbit-polynomial portfolio. It produced 5 fresh missing pairs, 166 fresh pair hits, and all 60 fresh seed hits\u2014clearly exceeding A\u2019s 2/98/58 and E\u2019s 2/18/15. The complementary geometries mattered: the signed-cube branch supplied stronger discovery density, while the quadratic\u2013quartic branch supplied broader group coverage and better verification. A showed that signed-cube geometry is productive but insufficient alone; E\u2019s Cartesian composita added useful but weaker complementary reach. D\u2019s portfolio-repair idea earned strong preliminary scores but failed seed consistency and ultimately delivered only 2 fresh pairs from 2 seeds, so its apparent promise did not translate into robust performance. B\u2019s signature-chamber proposal and C\u2019s GL(2,3) construction were pruned before benchmark evidence established broad value. No reported finalist produced a discriminant improvement, so the generation improved catalogue coverage rather than low-discriminant records. The previous feedback\u2019s larger aggregate counts and claimed discriminant gains are inconsistent with the supplied generation results and should not guide the next iteration.",
-    "next_generation_direction": "Start from S and run a fixed-budget ablation/rebalancing experiment over its two branches. Partition each branch into explicit parameter sublanes, record only aggregate verification rate, fresh-pair hits, fresh missing-pair count, and discriminant improvements, then remove sublanes whose marginal discoveries are redundant. Reallocate most recovered budget to new forced-action geometries outside signed cubes and 4\u00d72 Cartesian products, while reserving a small fixed quota for an independently verified discriminant-focused control. Require every proposed addition to beat the retained S sublanes on marginal missing-pair yield across repeated seed batches before it enters the portfolio.",
+    "diagnosis": "A is the clear discovery winner in the supplied generation: its nested quadratic towers produced 4 fresh missing pairs, 83 fresh pair hits, and coverage on 56 fresh seeds. This validates the hypothesis that genuinely nested towers access useful degree-eight actions missed by the existing reciprocal, Cartesian, and preimage-tree families. D and E each found only 1 fresh pair on 1 seed, so their higher numeric benchmark scores did not translate into comparable discovery breadth. D\u2019s adaptive allocation did achieve 3 discriminant improvements, making it useful for record refinement but not as the lead discovery strategy. B and C were pruned at screening and therefore provide no benchmark evidence; C remains untested rather than disproved. S failed operationally and yielded no measurements. The previous feedback describes a different result set and must not be reused: in this generation A\u2014not E\u2014won, with 4/83/56 and no discriminant improvements.",
+    "next_generation_direction": "Make A\u2019s nested-tower construction the primary lane and run a deterministic parameter-family ablation: separately benchmark generic, norm-square, and conjugate-pair constraints under equal runtime caps, recording verified yield, marginal missing-pair hits after deduplication, seed reach, and cost per verified polynomial. Concentrate the next full budget on the best complementary mixture, while reserving a small fixed D-style lane solely for low-discriminant improvements.",
     "what_worked": [
-      "Combining two explicitly complementary permutation geometries in a shared orbit-polynomial framework.",
-      "Prioritizing signed-cube orbits for discovery: the reported branch comparison favored them with 3 new pairs and 102 fresh-pair hits.",
-      "Retaining quadratic\u2013quartic Cartesian orbits for their higher verification rate and wider group coverage.",
-      "Preserving broad seed reach: S achieved fresh hits on all 60 seeds while improving missing-pair discovery.",
-      "Using forced-action structure to target proper transitive subgroups instead of relying on generic full-group behavior."
+      "A\u2019s genuinely nested quadratic towers delivered broad, seed-robust novelty: 4 missing pairs, 83 pair hits, and 56 seed hits.",
+      "Alternating generic and constrained tower parameters appears to sample multiple useful transitive actions rather than a single narrow family.",
+      "D\u2019s pilot-based allocation found 3 discriminant improvements, showing value as a small secondary record-search lane."
     ]
   },
   "incumbent_benchmark": {
     "candidate_slots": 2000,
-    "groups": 7,
-    "pairs": 14,
-    "sage_calls": 1796,
-    "score": 14070.754,
+    "groups": 23,
+    "pairs": 41,
+    "sage_calls": 2000,
+    "score": 41230.945,
     "status_counts": {
-      "duplicate_candidate": 204,
-      "reducible": 288,
-      "verified": 1508
+      "reducible": 110,
+      "verified": 1890
     },
-    "verified": 1508,
-    "verified_fraction": 0.754
+    "verified": 1890,
+    "verified_fraction": 0.945
   },
-  "incumbent_solver_hash": "e00f406ca46ee53c31242761701c4cf6e99c5163947d55481674c0bddcc2289e",
-  "last_new_pair_at": 52988,
-  "last_solver_change_at": 49988,
+  "incumbent_solver_hash": "30d76fcb4fa62d1562a305df18f49efc806374d9177f4dafb884dafa0bb28f42",
+  "last_new_pair_at": 72988,
+  "last_solver_change_at": 68988,
   "last_stop_code": "completed",
-  "next_generation": 3,
-  "next_search_batch": 58,
+  "next_generation": 5,
+  "next_search_batch": 78,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 57988,
+  "search_candidates_total": 77988,
   "version": 5
 }
