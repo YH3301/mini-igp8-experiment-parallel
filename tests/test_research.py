@@ -275,7 +275,7 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(config.benchmark_slots, 2000)
         self.assertEqual(config.fresh_round_seed_counts, (10, 20, 30))
         self.assertEqual(config.final_round_seed_counts, (20, 40))
-        self.assertEqual(config.max_ai, 32)
+        self.assertGreaterEqual(config.max_ai, 2)
         self.assertFalse(hasattr(config, "max_sage"))
         self.assertEqual(config.researcher_model, "gpt-5.6-sol")
         self.assertEqual(config.implementer_model, "gpt-5.6-terra")

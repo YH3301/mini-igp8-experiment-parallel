@@ -132,7 +132,7 @@ A new run has an empty catalogue/history/seen set and `solver.py == baseline_sol
 ## Default resource controls
 
 - Sage calls: **uncapped**; counted only as telemetry.
-- AI calls/session: 32.
+- AI calls/session: 45.
 - Wall time/session: 360 minutes.
 - One full generation normally uses 9 AI calls:
   - 1 Sol lead research;
@@ -140,7 +140,7 @@ A new run has an empty catalogue/history/seen set and `solver.py == baseline_sol
   - 1 Sol synthesis + 1 Terra synthesis when >=2 finalists survive;
   - 1 Sol generation critic.
 
-With 32 calls, a session can usually complete about three full synthesis generations, with spare
+With 45 calls, a session can usually complete about three full synthesis generations, with spare
 budget for partial cases. Increase this operational limit in `config.toml` if desired; it is not
 part of the mathematical acceptance criterion.
 
