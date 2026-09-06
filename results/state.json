@@ -1,27 +1,46 @@
 {
-  "accepted_solver_commit": "3e5ae5aac772e8ca5ad7218763b2f87d7c74188a",
-  "discriminant_improvements_total": 7,
-  "generation_feedback": null,
+  "accepted_solver_commit": "26be6d9b6a4a0e87824df47d2d584d5e36454f93",
+  "discriminant_improvements_total": 112,
+  "generation_feedback": {
+    "avoid": [
+      "Treating screen or preliminary scores as sufficient evidence when seed-consistency validation fails, as in D.",
+      "Expanding S with additional families before measuring overlap and marginal yield within its two existing branches.",
+      "Returning to narrow single-geometry proposals such as A, C, or E without a demonstrated complementary lane.",
+      "Assuming that signature targeting alone will improve catalogue coverage without benchmark evidence, as B did not reach that stage.",
+      "Claiming discriminant progress from blank fields or from the inconsistent prior summary; the reported benchmarked candidates show zero improvements where values are present.",
+      "Inferring the identities of hidden seeds, groups, or group\u2013signature pairs from aggregate counts."
+    ],
+    "diagnosis": "S won because it converted the strongest ideas from A and E into one coherent orbit-polynomial portfolio. It produced 5 fresh missing pairs, 166 fresh pair hits, and all 60 fresh seed hits\u2014clearly exceeding A\u2019s 2/98/58 and E\u2019s 2/18/15. The complementary geometries mattered: the signed-cube branch supplied stronger discovery density, while the quadratic\u2013quartic branch supplied broader group coverage and better verification. A showed that signed-cube geometry is productive but insufficient alone; E\u2019s Cartesian composita added useful but weaker complementary reach. D\u2019s portfolio-repair idea earned strong preliminary scores but failed seed consistency and ultimately delivered only 2 fresh pairs from 2 seeds, so its apparent promise did not translate into robust performance. B\u2019s signature-chamber proposal and C\u2019s GL(2,3) construction were pruned before benchmark evidence established broad value. No reported finalist produced a discriminant improvement, so the generation improved catalogue coverage rather than low-discriminant records. The previous feedback\u2019s larger aggregate counts and claimed discriminant gains are inconsistent with the supplied generation results and should not guide the next iteration.",
+    "next_generation_direction": "Start from S and run a fixed-budget ablation/rebalancing experiment over its two branches. Partition each branch into explicit parameter sublanes, record only aggregate verification rate, fresh-pair hits, fresh missing-pair count, and discriminant improvements, then remove sublanes whose marginal discoveries are redundant. Reallocate most recovered budget to new forced-action geometries outside signed cubes and 4\u00d72 Cartesian products, while reserving a small fixed quota for an independently verified discriminant-focused control. Require every proposed addition to beat the retained S sublanes on marginal missing-pair yield across repeated seed batches before it enters the portfolio.",
+    "what_worked": [
+      "Combining two explicitly complementary permutation geometries in a shared orbit-polynomial framework.",
+      "Prioritizing signed-cube orbits for discovery: the reported branch comparison favored them with 3 new pairs and 102 fresh-pair hits.",
+      "Retaining quadratic\u2013quartic Cartesian orbits for their higher verification rate and wider group coverage.",
+      "Preserving broad seed reach: S achieved fresh hits on all 60 seeds while improving missing-pair discovery.",
+      "Using forced-action structure to target proper transitive subgroups instead of relying on generic full-group behavior."
+    ]
+  },
   "incumbent_benchmark": {
     "candidate_slots": 2000,
-    "groups": 1,
-    "pairs": 4,
-    "sage_calls": 2000,
-    "score": 4010.974,
+    "groups": 7,
+    "pairs": 14,
+    "sage_calls": 1796,
+    "score": 14070.754,
     "status_counts": {
-      "reducible": 52,
-      "verified": 1948
+      "duplicate_candidate": 204,
+      "reducible": 288,
+      "verified": 1508
     },
-    "verified": 1948,
-    "verified_fraction": 0.974
+    "verified": 1508,
+    "verified_fraction": 0.754
   },
-  "incumbent_solver_hash": "e124bbc3972aed4a62f3cf8b0fe5994e6ff9ed341d4162c10c731b96fab34ac8",
-  "last_new_pair_at": 1000,
-  "last_solver_change_at": 0,
-  "last_stop_code": "research_infrastructure_failure",
-  "next_generation": 1,
-  "next_search_batch": 6,
+  "incumbent_solver_hash": "e00f406ca46ee53c31242761701c4cf6e99c5163947d55481674c0bddcc2289e",
+  "last_new_pair_at": 52988,
+  "last_solver_change_at": 49988,
+  "last_stop_code": "completed",
+  "next_generation": 3,
+  "next_search_batch": 58,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 6000,
+  "search_candidates_total": 57988,
   "version": 5
 }
