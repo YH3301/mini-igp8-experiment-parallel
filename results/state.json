@@ -34,7 +34,7 @@
   "incumbent_solver_hash": "14ff07152c06172468aeb36db9f43dac68b956733985ccef37c0d42c175c5d1d",
   "last_new_pair_at": 367452,
   "last_solver_change_at": 358834,
-  "last_stop_code": "completed",
+  "last_stop_code": "research_infrastructure_failure",
   "next_generation": 16,
   "next_search_batch": 122,
   "run_id": "78cf9bf6202f",

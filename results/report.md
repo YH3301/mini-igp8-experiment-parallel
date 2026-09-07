@@ -7,7 +7,7 @@
 - Search candidates since new pair/solver change: **51421**
 - Accepted solver generations: **7**
 - Best-field-discriminant improvements: **167**
-- Last stop: `completed`
+- Last stop: `research_infrastructure_failure`
 
 ## Complete solver experiment history
 
