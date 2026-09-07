@@ -2,9 +2,9 @@ version = 5
 
 [search]
 master_seed = 20260905
-batch_size = 1000
+batch_size = 10000
 oversample_factor = 2
-ask_ai_after_stagnation = 5000
+ask_ai_after_stagnation = 50000
 recent_hash_limit = 1000000
 
 [generation]
@@ -42,7 +42,7 @@ max_challengers_after_round1 = 2
 [parallel]
 # This is the global number of simultaneous Sage verifications. It is shared
 # by every A-E or S evaluation; it is not one pool per tournament candidate.
-verification_workers = 6
+verification_workers = 5
 
 [discriminants]
 continue_after_full_coverage = true
@@ -57,7 +57,7 @@ max_checks_per_finalist = 6
 # Sage calls are telemetry only and never stop a session.
 max_ai_calls_per_session = 45
 max_wall_minutes_per_session = 360
-ai_call_seconds = 900
+ai_call_seconds = 300
 solver_call_seconds = 30
 verification_seconds = 30
 progress_every_candidates = 100
