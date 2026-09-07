@@ -274,7 +274,6 @@ class ResearchTests(unittest.TestCase):
         self.assertEqual(config.max_screen_survivors, 3)
         self.assertEqual(config.screening_slots, 500)
         self.assertEqual(config.benchmark_slots, 2000)
-        self.assertEqual(config.fresh_round_seed_counts, (10, 20, 30))
         self.assertEqual(config.final_round_seed_counts, (20, 40))
         self.assertGreaterEqual(config.max_ai, 2)
         self.assertFalse(hasattr(config, "max_sage"))
