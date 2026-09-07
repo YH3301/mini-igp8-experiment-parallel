@@ -1,43 +1,44 @@
 {
-  "accepted_solver_commit": "17c37b95a32a427f10c37c0792701979f3ca805b",
-  "discriminant_improvements_total": 119,
+  "accepted_solver_commit": "1b8da6e437155061b49d35469ba601d04ada71c2",
+  "discriminant_improvements_total": 123,
   "generation_feedback": {
     "avoid": [
-      "Treating higher raw benchmark scores for D or E as evidence that they outperformed A on the stated discovery objective.",
-      "Claiming B or C failed algebraically when both were pruned before benchmark evaluation.",
-      "Using S as evidence for or against its portfolio hypothesis; the solver process failed.",
-      "Repeating the previous generation\u2019s E-centered diagnosis or its incompatible metrics.",
-      "Inferring any hidden seed or group-signature identities from aggregate counts.",
-      "Scaling A indiscriminately without measuring verification rate, runtime, and marginal novelty after deduplication."
+      "Treating E\u2019s or D\u2019s raw benchmark scores as evidence of discovery success despite zero fresh hits and zero discriminant improvements.",
+      "Claiming that S validates every family in its portfolio; the aggregate result provides no lane attribution.",
+      "Claiming B or C failed algebraically when they were pruned before benchmark evaluation.",
+      "Scaling the entire S portfolio uniformly without measuring each lane\u2019s verified yield, runtime, marginal novelty, and discriminant contribution.",
+      "Reusing the previous generation\u2019s A-centered diagnosis or its incompatible 4/83/56 metrics.",
+      "Inferring hidden seeds, missing-pair identities, or group signatures from the aggregate counts."
     ],
-    "diagnosis": "A is the clear discovery winner in the supplied generation: its nested quadratic towers produced 4 fresh missing pairs, 83 fresh pair hits, and coverage on 56 fresh seeds. This validates the hypothesis that genuinely nested towers access useful degree-eight actions missed by the existing reciprocal, Cartesian, and preimage-tree families. D and E each found only 1 fresh pair on 1 seed, so their higher numeric benchmark scores did not translate into comparable discovery breadth. D\u2019s adaptive allocation did achieve 3 discriminant improvements, making it useful for record refinement but not as the lead discovery strategy. B and C were pruned at screening and therefore provide no benchmark evidence; C remains untested rather than disproved. S failed operationally and yielded no measurements. The previous feedback describes a different result set and must not be reused: in this generation A\u2014not E\u2014won, with 4/83/56 and no discriminant improvements.",
-    "next_generation_direction": "Make A\u2019s nested-tower construction the primary lane and run a deterministic parameter-family ablation: separately benchmark generic, norm-square, and conjugate-pair constraints under equal runtime caps, recording verified yield, marginal missing-pair hits after deduplication, seed reach, and cost per verified polynomial. Concentrate the next full budget on the best complementary mixture, while reserving a small fixed D-style lane solely for low-discriminant improvements.",
+    "diagnosis": "S was the generation\u2019s only measured success: it found 1 fresh missing pair on 1 fresh seed and produced 4 discriminant improvements, earning acceptance. This supports the operational value of its protected, deterministically scheduled portfolio, but the aggregate metrics do not identify which construction lane produced the novelty or improvements. A\u2019s tower ablation was fully benchmarked and found no fresh pairs or discriminant improvements, so the proposed concentration of effort did not reproduce the prior generation\u2019s tower gains. D likewise produced no measured novelty or record improvements, while E\u2019s high raw scores also translated into zero discovery metrics. B and C were screen-pruned and remain untested rather than algebraically refuted. The supplied previous feedback refers to incompatible outcomes and should not be reused for this generation.",
+    "next_generation_direction": "Use S as the backbone, but instrument a deterministic leave-one-lane-out and quota-matched ablation of its tower, preimage-tree, relative-quartic, reciprocal, square-discriminant, and Eisenstein lanes. Record per-lane verified outputs, marginal fresh hits after global deduplication, seed reach, discriminant improvements, and runtime; then retain the smallest complementary mixture that reproduces S\u2019s discovery while preserving a separately capped record-refinement quota.",
     "what_worked": [
-      "A\u2019s genuinely nested quadratic towers delivered broad, seed-robust novelty: 4 missing pairs, 83 pair hits, and 56 seed hits.",
-      "Alternating generic and constrained tower parameters appears to sample multiple useful transitive actions rather than a single narrow family.",
-      "D\u2019s pilot-based allocation found 3 discriminant improvements, showing value as a small secondary record-search lane."
+      "S combined one fresh discovery with 4 discriminant improvements, the strongest relevant result in the generation.",
+      "Protected family quotas and deterministic weighted scheduling plausibly preserved complementary search lanes, although lane-level attribution was not recorded.",
+      "S demonstrated that discovery and record refinement can coexist when discriminant minimization remains a late, within-cell tie-break."
     ]
   },
   "incumbent_benchmark": {
     "candidate_slots": 2000,
-    "groups": 23,
-    "pairs": 41,
-    "sage_calls": 2000,
-    "score": 41230.945,
+    "groups": 28,
+    "pairs": 57,
+    "sage_calls": 1938,
+    "score": 57280.84,
     "status_counts": {
-      "reducible": 110,
-      "verified": 1890
+      "duplicate_candidate": 62,
+      "reducible": 258,
+      "verified": 1680
     },
-    "verified": 1890,
-    "verified_fraction": 0.945
+    "verified": 1680,
+    "verified_fraction": 0.84
   },
-  "incumbent_solver_hash": "30d76fcb4fa62d1562a305df18f49efc806374d9177f4dafb884dafa0bb28f42",
-  "last_new_pair_at": 72988,
-  "last_solver_change_at": 68988,
+  "incumbent_solver_hash": "75219ff98e52d669f68adc6409a0b6b6cdf4ab7680e91e59ab8b4b43dbf45b9b",
+  "last_new_pair_at": 81988,
+  "last_solver_change_at": 77988,
   "last_stop_code": "completed",
-  "next_generation": 5,
-  "next_search_batch": 78,
+  "next_generation": 6,
+  "next_search_batch": 87,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 77988,
+  "search_candidates_total": 86988,
   "version": 5
 }

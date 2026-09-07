@@ -1,12 +1,12 @@
 # Mini-IGP8 status
 
 - Run: **78cf9bf6202f**
-- Catalogue: **101 / 157 pairs** across **41 / 50 groups**
-- Current frozen-benchmark score: **41230.945**
-- Search candidates checked: **77988**
+- Catalogue: **102 / 157 pairs** across **41 / 50 groups**
+- Current frozen-benchmark score: **57280.84**
+- Search candidates checked: **86988**
 - Search candidates since new pair/solver change: **5000**
-- Accepted solver generations: **4**
-- Best-field-discriminant improvements: **119**
+- Accepted solver generations: **5**
+- Best-field-discriminant improvements: **123**
 - Last stop: `completed`
 
 ## Complete solver experiment history
@@ -40,6 +40,12 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 4 | D | no | final_rejected | 26150.882000000001 | 42230.841000000000 | 1 | 1 | 3 | `final_lower_rank` | The incumbent’s success comes from complementary structural lanes and fingerprint selection, but fixed 30/30/25/15 quotas need not match each seed’s supply of irreducible, locally novel candidates. A small deterministic pilot followed by marginal-novelty quota allocation can retain the six-pair, all-seed robustness with fewer redundant candidates. The recovered capacity can support a protected, tightly capped nested-tower lane without repeating the timeout-prone oversized-pool implementations. |
 | 4 | E | no | preliminary_rejected | 29170.795999999998 | 43240.793500000000 | 1 | 1 |  | `rejected_fresh_discovery_regression` | Greedy maximin distance can overvalue extreme but repetitive fingerprints, while fixed round-robin can miss small rare clusters. A deterministic novelty archive combining coverage, protected exploration, and a subordinate low-height Pareto reserve should sample more distinct algebraic neighborhoods. Pooling several genuinely different constructions before selection can discover missing pairs that no single lane reaches reliably and can naturally expose smaller-discriminant representatives of already-solved difficult pairs. |
 | 4 | S | no | synthesis_rejected |  |  |  |  |  | `solver_process_failed` | Use an evidence-weighted structural portfolio with constrained nested quadratic towers as the anchor and the incumbent’s reciprocal, preimage-tree, square-discriminant, and Eisenstein geometries as protected complements. A deserves most of the budget: it delivered six fresh missing pairs, 77 fresh hits, and 94.47% verification, versus D’s three pairs, four hits, and 91.9%. However, D reached more total groups and pairs, so its genuinely different actions remain valuable as low-volume exploration. The families should share one validation, fingerprinting, deduplication, and selection pipeline; D’s synthetic repeated-squaring “tower” should be replaced by A’s actual field-tower construction. |
+| 5 | A | no | preliminary_rejected | 20110.871999999999 | 37210.866499999996 | 0 | 0 |  | `rejected_no_measured_gain` | The four-way tower mixture obscures which algebraic constraints caused generation 4's broad novelty. Generic towers, square relative-norm towers, base-times-square norm towers, and conjugate-pair final radicands impose different index conditions on the binary-tree Galois action. A runtime-balanced ablation with protected generic capacity will concentrate outputs in the one or two constrained actions responsible for entirely missing groups while retaining the seed robustness of unconstrained towers. |
+| 5 | B | no | screen_pruned | 14090.962000000000 |  |  |  |  | `screen_pruned_to_top_survivors` | For P(x)=x^4 g(x+s+d/x), the transitive action is supplied by a quartic base with coupled quadratic fibers, but its signature can be selected before expansion. If d=q^2>0, each real root y of g outside [s-2q,s+2q] contributes two real roots of P; roots inside contribute none. If d<0, every real root of g contributes two. Constructing irreducible quartics in certified root chambers should move mass among r=0, r=4, and r=8 without changing the structural family, exposing signatures that coefficient-randomized reciprocal lifts rarely visit. |
+| 5 | C | no | screen_pruned | 14050.912000000000 |  |  |  |  | `screen_pruned_to_top_survivors` | Let alpha generate a quartic field and adjoin w with w^2=q(alpha). The eight conjugates pair quadratic fibers whose radicands depend on the quartic embedding, unlike a Cartesian compositum with one rational quadratic field. Generic q produces a C2-wreath-S4-type action, while square-norm and conjugate-product constraints cut out distinct transitive subactions. Characteristic polynomials of theta=w+t(alpha) should therefore reach degree-eight groups missed by independent fibers and three-step binary towers. |
+| 5 | D | no | final_round1_pruned | 27160.831999999999 | 44270.779999999999 | 0 | 0 |  | `final_round1_pruned` | The accepted generation-3 portfolio found six missing pairs across every fresh seed, but its later adaptive variant mostly improved discriminants and found only one fresh pair. The useful ingredient was complementary algebraic geometry, not a large maximin pool. Streaming low-height enumeration with protected family quotas, exact early rejection, and within-fingerprint preference for small polynomial discriminant should preserve discovery coverage at lower runtime and naturally find smaller-discriminant fields. |
+| 5 | E | no | final_rejected | 40200.889999999999 | 56280.889999999999 | 0 | 0 | 0 | `final_lower_rank` | Pseudorandom shell schedules can repeatedly sample nearby parameter regions even when several algebraic families are present. A deterministic low-discrepancy design over family, constraint type, signature request, coefficient scale, and local congruence cell should cover the product space more uniformly without generating a huge pool. Interleaving virtual substreams derived publicly from the input seed should improve robustness while explicit protected cells prevent common fingerprints from consuming the budget. |
+| 5 | S | yes | final | 46230.874000000003 | 57280.839999999997 | 1 | 1 | 4 | `accepted_discriminant_improvement_gain` | Use the proven nested quadratic towers as the protected discovery backbone, then add narrowly budgeted preimage-tree, relative-quartic, reciprocal, square-discriminant, and Eisenstein lanes. Coordinate them with a deterministic weighted scheduler and a common, sound local-global sieve. Diversity selection should operate only within each family’s protected quota: empty structural cells win first, while polynomial discriminant is merely a late tie-break among candidates already occupying the same cell. This preserves the incumbent’s strongest evidence for missing-pair discovery while retaining D’s fresh-pair mechanism and E’s broader benchmark coverage. |
 
 ## Catalogue
 
@@ -96,7 +102,7 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T26 | 4 | 43789058048 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, 0, 0, -5, 0, 0, 0, 1` |
 | 8T27 | 0 | 5328125 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 5, -4, 9, -4, 5, -1, 1` |
 | 8T27 | 2 | 196171875 | `6746e8cd7253` | `6746e8cd7253` | `1, 3, 3, 6, 5, 6, 3, 3, 1` |
-| 8T27 | 4 | 4804000000 | `798a8888bc31` | `798a8888bc31` | `5, 0, -5, 10, -4, -4, 6, -4, 1` |
+| 8T27 | 4 | 164000000 | `798a8888bc31` | `1b8da6e43715` | `1, -4, 5, -6, 9, -6, 5, -4, 1` |
 | 8T27 | 6 | 380000000 | `6746e8cd7253` | `798a8888bc31` | `1, -6, 7, 2, -10, 8, 2, -4, 1` |
 | 8T27 | 8 | 2841328125 | `6746e8cd7253` | `6746e8cd7253` | `1, 12, -32, -51, 50, 99, 53, 12, 1` |
 | 8T28 | 0 | 90870848 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 5, -5, 6, -5, 5, -3, 1` |
@@ -107,9 +113,9 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T29 | 8 | 150196986118144 | `798a8888bc31` | `798a8888bc31` | `57, 64, -256, -8, 337, -280, 98, -16, 1` |
 | 8T30 | 0 | 184146722816 | `6746e8cd7253` | `6746e8cd7253` | `14, 0, 16, 0, 12, 0, 4, 0, 1` |
 | 8T30 | 2 | 21434375 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 2, -5, 1, -5, 2, -1, 1` |
-| 8T31 | 0 | 17668125 | `6746e8cd7253` | `6746e8cd7253` | `31, -153, 339, -435, 356, -189, 63, -12, 1` |
+| 8T31 | 0 | 4002048 | `6746e8cd7253` | `1b8da6e43715` | `1, -2, 7, -14, 18, -16, 10, -4, 1` |
 | 8T31 | 2 | 2717908992 | `6746e8cd7253` | `6746e8cd7253` | `-2, 0, -4, 0, 2, 0, 4, 0, 1` |
-| 8T31 | 4 | 138953097216 | `17c37b95a32a` | `17c37b95a32a` | `-136943, -72384, -14368, 1920, 3878, 96, -128, 0, 1` |
+| 8T31 | 4 | 1024524288 | `17c37b95a32a` | `1b8da6e43715` | `1, 0, -4, -8, -3, 4, 6, 4, 1` |
 | 8T31 | 6 | 2717908992 | `6746e8cd7253` | `6746e8cd7253` | `-2, 0, 4, 0, 2, 0, -4, 0, 1` |
 | 8T31 | 8 | 20316160000 | `6746e8cd7253` | `6746e8cd7253` | `31, 0, -72, 0, 48, 0, -12, 0, 1` |
 | 8T32 | 0 | 1142440000 | `6746e8cd7253` | `6746e8cd7253` | `1, 6, 15, -4, -5, 20, 22, 8, 1` |
@@ -120,6 +126,7 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T35 | 8 | 1480160000 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, 24, 16, -38, -2, 19, -8, 1` |
 | 8T38 | 0 | 374863125 | `6746e8cd7253` | `6746e8cd7253` | `9, 30, 91, 189, 225, 153, 59, 12, 1` |
 | 8T38 | 2 | 62804734776 | `6746e8cd7253` | `6746e8cd7253` | `1, -4, 3, -5, 2, -5, 3, -4, 1` |
+| 8T38 | 4 | 95328615285 | `1b8da6e43715` | `1b8da6e43715` | `1, 0, -3, 3, -7, 3, -3, 0, 1` |
 | 8T39 | 0 | 13424896 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, 0, 0, 0, 0, 0, 1` |
 | 8T39 | 4 | 20502784 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -1, 0, 4, 0, -4, 0, 1` |
 | 8T39 | 8 | 323296862464 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -10, 0, 19, 0, -9, 0, 1` |
