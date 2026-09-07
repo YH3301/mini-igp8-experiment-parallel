@@ -3,19 +3,18 @@
   "discriminant_improvements_total": 167,
   "generation_feedback": {
     "avoid": [
-      "Continuing to allocate the main budget to the same tested Q8/biquadratic strata solely because A succeeded in the previous generation.",
-      "Treating A\u2019s strong benchmark score as evidence of coverage gain when all novelty metrics were zero.",
-      "Reviving B\u2019s signature-chamber strategy or S\u2019s combined lanes without a materially new structural mechanism.",
-      "Claiming that C or E failed mathematically; both were screening-pruned before benchmarking.",
-      "Drawing conclusions about discriminants from blank improvement fields.",
-      "Inferring hidden pair identities, seed identities, or overlap among candidates."
+      "Treating the incumbent's default win as evidence of superior mathematical coverage.",
+      "Inferring hidden seeds, missing-pair identities, novelty, overlap, or discriminant performance from blank metrics.",
+      "Describing any candidate as screened or benchmarked.",
+      "Starting multiple ambitious constructors before one minimal pipeline completes.",
+      "Adding new mathematical families until the shared implementation-timeout failure is resolved."
     ],
-    "diagnosis": "The generation produced no measured gain: every benchmarked candidate recorded 0 fresh missing pairs, 0 fresh-pair hits, and 0 fresh-seed hits, so the incumbent correctly remained the winner. A and D achieved the strongest challenger benchmark scores (both about 33,170.94), but neither converted that performance into novelty. This is especially important for A: its cocycle-certified Q8 approach was the previous generation\u2019s clear source of new coverage, yet the present diversification produced nothing new, suggesting diminishing returns or exhaustion in the tested strata rather than disproving the construction generally. B again produced no fresh hits, while S\u2019s combined engine also added no novelty and scored substantially below A and D. C and E were removed during screening, so their cyclic-quartic and generic-octic hypotheses remain untested. Blank discriminant fields support no conclusion about discriminant quality.",
-    "next_generation_direction": "Run a focused, quota-protected test of C\u2019s cyclic-quartic tower construction as the next orthogonal structural family. Build a small certificate-driven matrix over C4-stable square-class ranks, norm relations, and feasible signatures; reserve enough budget for completed Galois-group verification so it cannot be eliminated purely by incumbent-biased screening. Deduplicate before verification, impose per-polynomial timeouts, and log completion rate, explicit observed pair identifiers, signatures, unique fresh-pair yield, seed coverage, and discriminants. Keep only a small A/Q8 control lane to measure whether its previously productive family is now saturated.",
+    "diagnosis": "All five candidates failed during implementation with `ai_call_timeout`, so the generation produced no screening or benchmark evidence. There is no basis for comparing mathematical novelty, coverage, signatures, Galois groups, discriminants, or candidate quality. The incumbent won by default. The main failure was operational overreach: five substantial ideas were pursued before establishing one minimal end-to-end executable path.",
+    "next_generation_direction": "Run only a minimal Candidate A prototype: fix one explicit cyclic quartic field, construct one certified C4-stable square class (at most two if inexpensive), derive and deduplicate its polynomial, then perform exactly one Galois-group verification with strict stage-level and per-polynomial timeouts. Keep one small incumbent control and separately log construction success, verification success, runtime, and benchmark outcome. Expand square-class ranks, norm relations, and signature targeting only after this case finishes end to end; if it times out, profile and simplify this same pipeline instead of introducing another family.",
     "what_worked": [
-      "A and D remained computationally competitive, posting the highest challenger benchmark scores.",
-      "The pipeline correctly rejected high-scoring candidates that failed to add distinct missing pairs.",
-      "Screening and staged pruning limited investment in weaker candidates, although it also left C and E scientifically unresolved."
+      "The hypotheses covered meaningfully different mechanisms rather than minor parameter variations.",
+      "Candidate A followed the previously identified cyclic-quartic square-class direction.",
+      "The logs correctly identify implementation timeout as distinct from mathematical or benchmark rejection."
     ]
   },
   "incumbent_benchmark": {
@@ -36,7 +35,7 @@
   "last_new_pair_at": 367452,
   "last_solver_change_at": 358834,
   "last_stop_code": "completed",
-  "next_generation": 14,
+  "next_generation": 16,
   "next_search_batch": 122,
   "run_id": "78cf9bf6202f",
   "search_candidates_total": 418873,
