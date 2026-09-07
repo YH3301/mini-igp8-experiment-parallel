@@ -149,6 +149,7 @@ class Config:
     ai_seconds: int
     solver_seconds: int
     verification_seconds: int
+    verification_workers: int
     progress_every: int
     researcher_model: str
     researcher_reasoning: str
@@ -230,6 +231,7 @@ def load_config(path: Path = CONFIG_FILE) -> Config:
     discriminants = raw["discriminants"]
     limits = raw["limits"]
     models = raw["models"]
+    parallel = raw.get("parallel", {"verification_workers": 1})
 
     efforts = {"low", "medium", "high", "xhigh"}
     for key in (
@@ -305,6 +307,9 @@ def load_config(path: Path = CONFIG_FILE) -> Config:
         solver_seconds=_positive(limits["solver_call_seconds"], "limits.solver_call_seconds"),
         verification_seconds=_positive(
             limits["verification_seconds"], "limits.verification_seconds"
+        ),
+        verification_workers=_positive(
+            parallel["verification_workers"], "parallel.verification_workers"
         ),
         progress_every=_positive(
             limits["progress_every_candidates"], "limits.progress_every_candidates"
@@ -541,6 +546,8 @@ def _experiment_row(**values: object) -> dict:
 
 
 def _initialize_workspace(path: Path, solver_source: str, task_text: str) -> None:
+    """Create one disposable, isolated workspace for an AI candidate."""
+
     path.mkdir(parents=True, exist_ok=True)
     (path / "solver.py").write_text(solver_source, encoding="utf-8")
     (path / "TASK.md").write_text(task_text, encoding="utf-8")
@@ -632,6 +639,12 @@ The solver contract is only: generate exactly budget UNIQUE deterministic monic 
 vectors [a0,...,a8], with a8=1 and a0!=0. There is no coefficient magnitude bound and no symmetry
 requirement. Never hard-code catalogue polynomials, target answers, or hidden seeds. Use the prior
 generation critic and measured history. Return the required JSON only.
+
+Do not treat solver evolution as monotone code accumulation.
+
+When introducing a new construction or search family, consider replacing or removing mechanisms that have shown little measured value. Keep the solver conceptually coherent. A shorter/faster solver with equal or better missing-pair performance is preferable to a larger solver.
+
+Candidate generation runtime is part of solver quality. Do not trade a modest statistical gain for a dramatic slowdown unless the gain is in genuinely rare missing target pairs.
 """.strip()
     return rules + "\n\nEXPERIMENT CONTEXT\n" + json.dumps(context, sort_keys=True)
 
@@ -773,6 +786,7 @@ class ResearchController:
             candidates_per_seed=self.config.benchmark_size,
             solver_seconds=self.config.solver_seconds,
             verification_seconds=self.config.verification_seconds,
+            workers=self.config.verification_workers,
             verifier=self.verifier,
             deadline=budget.deadline,
             progress=self._stage_progress("baseline benchmark"),
@@ -857,6 +871,7 @@ class ResearchController:
                 "Edit solver.py only; do not create files or commit.",
             ],
         }, sort_keys=True)
+
         response = self.llm.call(
             prompt=prompt,
             cwd=workspace,
@@ -865,6 +880,7 @@ class ResearchController:
             sandbox="workspace-write",
             timeout=timeout,
         )
+
         changed = _changed_paths(workspace)
         if changed != ["solver.py"]:
             raise SolverError(f"implementer_changed_forbidden_paths:{changed}")
@@ -936,6 +952,7 @@ class ResearchController:
                     candidates_per_seed=self.config.screening_size,
                     solver_seconds=self.config.solver_seconds,
                     verification_seconds=self.config.verification_seconds,
+                    workers=self.config.verification_workers,
                     verifier=self.verifier,
                     deadline=budget.deadline,
                     progress=self._stage_progress(f"candidate {candidate['id']} screen"),
@@ -987,6 +1004,7 @@ class ResearchController:
                     candidates_per_seed=self.config.benchmark_size,
                     solver_seconds=self.config.solver_seconds,
                     verification_seconds=self.config.verification_seconds,
+                    workers=self.config.verification_workers,
                     verifier=self.verifier,
                     deadline=budget.deadline,
                     progress=self._stage_progress(f"candidate {candidate['id']} benchmark"),
@@ -1047,6 +1065,7 @@ class ResearchController:
                 already_seen=incumbent_seen,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
+                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress(f"generation {generation} incumbent prelim r{round_index + 1}"),
@@ -1069,6 +1088,7 @@ class ResearchController:
                         already_seen=candidate["prelim_seen"],
                         solver_seconds=self.config.solver_seconds,
                         verification_seconds=self.config.verification_seconds,
+                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(
@@ -1202,6 +1222,7 @@ class ResearchController:
 
         best = finalists[0]
         workspace = generation_dir / "candidate-S"
+
         references = {
             "synthesis_plan": response.data,
             "finalists": [
@@ -1273,6 +1294,7 @@ class ResearchController:
                 candidates_per_seed=self.config.screening_size,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
+                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress("synthesized screen"),
@@ -1294,6 +1316,7 @@ class ResearchController:
                 candidates_per_seed=self.config.benchmark_size,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
+                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress("synthesized benchmark"),
@@ -1399,6 +1422,7 @@ class ResearchController:
                 already_seen=incumbent_seen,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
+                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress(f"generation {generation} incumbent final r{round_index + 1}"),
@@ -1421,6 +1445,7 @@ class ResearchController:
                         already_seen=candidate["final_seen"],
                         solver_seconds=self.config.solver_seconds,
                         verification_seconds=self.config.verification_seconds,
+                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(f"candidate {candidate['id']} final r{round_index + 1}"),
@@ -1873,6 +1898,7 @@ class ResearchController:
                         already_seen=seen,
                         solver_seconds=self.config.solver_seconds,
                         verification_seconds=self.config.verification_seconds,
+                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(f"search batch {batch}"),

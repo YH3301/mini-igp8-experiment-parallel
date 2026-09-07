@@ -132,6 +132,9 @@ A new run has an empty catalogue/history/seen set and `solver.py == baseline_sol
 ## Default resource controls
 
 - Sage calls: **uncapped**; counted only as telemetry.
+- Sage verification workers: **6 total**. Each evaluation batch uses at most
+  six independent Sage processes; this is one global batch limit, not six
+  processes for each of A--E and S simultaneously.
 - AI calls/session: 45.
 - Wall time/session: 360 minutes.
 - One full generation normally uses 9 AI calls:

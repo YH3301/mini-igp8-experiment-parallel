@@ -34,3 +34,9 @@ coefficient vectors `[a0,...,a8]` with integer entries, `a8 == 1`, and `a0 != 0`
 coefficient magnitude bound and no reciprocal/palindromic requirement.
 
 Never hard-code catalogue polynomials, target answers, or held-out seed values.
+
+### Human-readable solver code
+
+`solver.py` must remain understandable to a human researcher. Optimization does not justify code golf. Use conventional Python formatting, descriptive names, appropriate helper functions, and useful comments/docstrings for mathematical constructions.
+
+Do not use semicolon-separated statements, multiple statements on one line, unnecessarily compressed comprehensions/lambdas, or deliberately minified code. Keep mathematical and performance-sensitive code readable. Prefer simple code over clever code when performance is comparable.

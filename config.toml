@@ -39,6 +39,11 @@ candidates_per_seed = 100
 oversample_factor = 2
 max_challengers_after_round1 = 2
 
+[parallel]
+# This is the global number of simultaneous Sage verifications. It is shared
+# by every A-E or S evaluation; it is not one pool per tournament candidate.
+verification_workers = 6
+
 [discriminants]
 continue_after_full_coverage = true
 # Secondary objective only. New target-pair discovery always outranks this.
