@@ -1,13 +1,13 @@
 # Mini-IGP8 status
 
 - Run: **78cf9bf6202f**
-- Catalogue: **102 / 157 pairs** across **41 / 50 groups**
+- Catalogue: **116 / 157 pairs** across **41 / 50 groups**
 - Current frozen-benchmark score: **57280.84**
-- Search candidates checked: **86988**
-- Search candidates since new pair/solver change: **5000**
+- Search candidates checked: **296988**
+- Search candidates since new pair/solver change: **50000**
 - Accepted solver generations: **5**
-- Best-field-discriminant improvements: **123**
-- Last stop: `completed`
+- Best-field-discriminant improvements: **147**
+- Last stop: `research_infrastructure_failure`
 
 ## Complete solver experiment history
 
@@ -46,6 +46,31 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 5 | D | no | final_round1_pruned | 27160.831999999999 | 44270.779999999999 | 0 | 0 |  | `final_round1_pruned` | The accepted generation-3 portfolio found six missing pairs across every fresh seed, but its later adaptive variant mostly improved discriminants and found only one fresh pair. The useful ingredient was complementary algebraic geometry, not a large maximin pool. Streaming low-height enumeration with protected family quotas, exact early rejection, and within-fingerprint preference for small polynomial discriminant should preserve discovery coverage at lower runtime and naturally find smaller-discriminant fields. |
 | 5 | E | no | final_rejected | 40200.889999999999 | 56280.889999999999 | 0 | 0 | 0 | `final_lower_rank` | Pseudorandom shell schedules can repeatedly sample nearby parameter regions even when several algebraic families are present. A deterministic low-discrepancy design over family, constraint type, signature request, coefficient scale, and local congruence cell should cover the product space more uniformly without generating a huge pool. Interleaving virtual substreams derived publicly from the input seed should improve robustness while explicit protected cells prevent common fingerprints from consuming the budget. |
 | 5 | S | yes | final | 46230.874000000003 | 57280.839999999997 | 1 | 1 | 4 | `accepted_discriminant_improvement_gain` | Use the proven nested quadratic towers as the protected discovery backbone, then add narrowly budgeted preimage-tree, relative-quartic, reciprocal, square-discriminant, and Eisenstein lanes. Coordinate them with a deterministic weighted scheduler and a common, sound local-global sieve. Diversity selection should operate only within each family’s protected quota: empty structural cells win first, while polynomial discriminant is merely a late tie-break among candidates already occupying the same cell. This preserves the incumbent’s strongest evidence for missing-pair discovery while retaining D’s fresh-pair mechanism and E’s broader benchmark coverage. |
+| 6 | A | no | preliminary_rejected | 2011.000000000000 | 2011.000000000000 | 0 | 0 |  | `rejected_no_measured_gain` | The entirely absent 8T5 pairs can be reached directly by primitive elements of multiquadratic fields with three independent square classes. For theta=m+c1*sqrt(d1)+c2*sqrt(d2)+c3*sqrt(d3), the product over all eight sign choices is an integral octic with the regular C2^3 action. Three positive radicands give eight real roots, while introducing a negative independent radicand gives no real embeddings. The incumbent's nested towers almost never land on this deliberately split first layer, explaining why this elementary group can remain wholly absent despite broad tower coverage. |
+| 6 | B | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | The incumbent samples tower radicands first and only measures the signature afterward, so total reality is exponentially scarce across successive quadratic layers. Reversing that logic should expose missing r=8 realizations without changing the useful tower group geometry. Enforcing positivity at every real embedding of Q(u,v) makes the final quadratic extension totally real; controlled sign failures and exact root counting can separately supply r=6 or r=4 candidates. |
+| 6 | C | no | preliminary_rejected | 6030.876000000000 | 7030.723000000000 | 0 | 0 |  | `rejected_no_measured_gain` | Let beta1,beta2,beta3 be the conjugates of a shifted irreducible cubic and define theta=sqrt(beta1)+sqrt(beta2)+sqrt(beta3). Its eight sign sums have an orbit polynomial symmetric in the betai. When their square classes are independent over the cubic splitting field, the action is C2^3 semidirect the cubic Galois group: cyclic cubic bases give a C2^3:C3 action and S3 bases give the full cube action C2^3:S3. These structured degree-eight actions occupy algebraic territory not sampled by the incumbent and may account for one or more entirely missing groups. |
+| 6 | D | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | The accepted solver is probably larger than necessary. Its discovery can be reproduced by a smaller complementary subset if each lane is measured by verified yield, marginal signature-pattern cells after global deduplication, and deterministic computational cost. Removing lanes that supply only redundant fingerprints should allow more attempts in the productive lanes and reduce generation time without sacrificing the accepted solver's rare discovery. |
+| 6 | E | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | The failed low-discrepancy candidate spread effort treated geometric separation as novelty, but extreme fingerprints can still represent the same common group. A bounded archive based on exact discrete cells—construction, signature, multi-prime cycle spectrum, discriminant square class, and ramification profile—should protect genuinely rare algebraic behavior. Within repeated cells, low polynomial discriminant and mild ramification can select new fields likely to improve difficult field-discriminant records without overwhelming discovery. |
+| 7 | A | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | For a monic irreducible quartic h(y), the resultant P(x)=Res_y(h(y),x^2-q(y)) has four coupled quadratic fibers. Generic q gives the full sign kernel over the quartic action, while forcing Norm(q(alpha)) to be a rational square cuts the sign kernel by a parity relation and should reach transitive subgroups absent from the incumbent's mostly unconstrained fibers. With q(y)=y-t, the constraint is simply h(t)=s^2 and can be parameterized without a rare rejection. Varying the quartic base geometry and alternating square-norm and nonsquare-norm fibers should access several entirely absent groups rather than only 8T5-like regular multiquadratic fields. |
+| 7 | B | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | The incumbent chooses nested quadratic radicands before measuring their real signs, making total reality unnecessarily sparse. In K=Q(u,v), with u^2=a and v^2=b0+b1u, all four real embeddings can be enumerated cheaply. Choosing the final radicand c0+c1u+c2v+c3uv only after these embeddings are known allows c0 to be placed above their maximum negative contribution for r=8, below their minimum for r=0, or between ordered thresholds for r=2,4,6. This preserves the useful tower group geometry while making the requested signature deterministic. |
+| 7 | C | no | preliminary_rejected | 2020.892000000000 | 2020.730000000000 | 0 | 0 |  | `rejected_no_measured_gain` | For E:y^2=x^3+Ax+B, the eight nonzero 3-torsion points form a natural transitive degree-8 orbit, generically acted on by GL(2,3). Eliminating x between the 3-division polynomial 3x^4+6Ax^2+12Bx-A^2 and y^2-x^3-Ax-B produces an octic in y whose specializations explore the degree-8 action and its arithmetic subgroups. This rigid geometry should concentrate on rare groups that generic coefficient searches almost never encounter. |
+| 7 | D | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | The accepted solver's useful coverage can be retained by three coherent mechanisms—nested quadratic towers, depth-three quadratic preimage trees, and sparse Eisenstein controls—while reciprocal, critical-point, and general relative-quartic lanes consume complexity without measured marginal attribution. Streaming several low-height proposals per protected family and selecting by signature plus multi-prime cycle-spectrum occupancy should increase verified novelty per second. Saved runtime can be spent on more tower and tree attempts rather than exact discriminants or large shells. |
+| 7 | E | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | Random shells repeatedly revisit common modular behavior. Coefficient-wise Chinese remainder construction can instead force an irreducibility certificate at one prime and selected squarefree factorization types at two other primes. Crossing these local cycle templates with several compact global geometries—generic sparse octics, even quartic-in-x-squared forms, and shallow quadratic compositions—should cover permutation constraints more uniformly. Selecting the smallest-height representative of each signature/cycle cell can simultaneously explore overlooked groups and produce unusually small fields. |
+| 8 | A | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | Let h(y) be a small irreducible quartic and form P(x)=Norm_{Q(α)/Q}(x^2-q(α)). Generic fibers allow independent sign changes, whereas imposing Norm(q(α))=s^2 creates an even-parity relation in the sign kernel. Varying the quartic base group and whether this norm relation is imposed should reach imprimitive octic groups systematically missed by unconstrained towers. Sign choices of q at the real embeddings of α independently provide r=0,4,8 lanes. |
+| 8 | B | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | The incumbent samples the final quadratic radicand before examining its signs, so totally real outputs are unnecessarily rare. In K=Q(u,v), enumerate its four real embeddings first and choose c=c0+c1u+c2v+c3uv by setting c0 just above the largest negative contribution. Then w^2=c is positive at every embedding, forcing eight real conjugates while retaining the tower's useful Galois geometry. Placing c0 between ordered thresholds similarly produces controlled intermediate signatures. |
+| 8 | C | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | Start from a quadratic field F=Q(√d) and a cyclic quartic extension L/F represented by a sparse quartic whose relative discriminant is a square in F. Taking the norm from F to Q produces an octic whose eight roots form two conjugate quartic cycles. The action generated by the quartic rotation and quadratic conjugation is naturally cyclic, dihedral, or a small extension thereof, a geometry not supplied by nested quadratic fibers or elliptic 3-torsion. Conjugating the relative quartic coefficients gives direct control over whether its two quartic root sets are real or complex. |
+| 8 | D | no | preliminary_rejected | 29140.925999999999 | 49240.909500000002 | 0 | 0 |  | `rejected_no_measured_gain` | The accepted solver's novelty is likely concentrated in a small subset of its tower, preimage-tree, and Eisenstein mechanisms, while reciprocal, critical, and broad relative-quartic lanes consume proposal and exact-arithmetic time without measured marginal attribution. A two-pass streaming scheduler that rewards only family-signature-modular cells not yet represented can preserve the discovery backbone, increase verified throughput, and redirect saved slots toward rare tower signatures. |
+| 8 | E | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | Common groups dominate when proposals are selected only by coefficient geometry. Prescribing squarefree factorization patterns modulo three primes can force informative Frobenius cycle combinations and steer a small collection of global families toward underrepresented transitive-group regions. A bounded archive of exact discrete templates—not geometric distance—can prevent common modular behavior from exhausting the budget. The same compact families, searched at the smallest coefficient shells late in the run, can improve large incumbent discriminants. |
+| 9 | A | no | preliminary_rejected | 13080.972000000000 | 22140.949499999999 | 0 | 0 |  | `rejected_no_measured_gain` | Let h(y)=y^4+a*y^3+b*y^2+c*y+d be irreducible and choose integers t and nonzero s with d=s^2-t^4-a*t^3-b*t^2-c*t, so h(t)=s^2. Then P(x)=h(t-x^2)=Norm(x^2-(t-alpha)) is a monic octic whose four quadratic fibers have square product. This forces an even-parity relation in the fiber sign kernel while retaining the quartic base action, producing proper subgroups of C2 wr Gal(h) that generic towers rarely visit. Varying the modularly certified quartic base action should expose one or more wholly absent transitive groups. |
+| 9 | B | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | In K=Q(u,v), with u^2=a>0 and v^2=b0+b1*u positive under both embeddings of Q(u), the four real embeddings of K are explicit. For c=c0+c1*u+c2*v+c3*u*v, choosing c0 only after evaluating the other three terms permits c to be positive at all four embeddings. Then adjoining w with w^2=c forces an octic primitive element to have eight real conjugates, while changes in a,b0,b1 and the nonconstant part of c still vary the tower's Galois closure. This should convert the incumbent's useful tower mechanism into targeted coverage of missing totally real signatures. |
+| 9 | C | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | For a conductor m and an index-eight subgroup H of (Z/mZ)^*, the eight Gaussian periods eta_g=sum_{h in H} zeta_m^(g*h), indexed by cosets gH, form a transitive degree-eight orbit. Their period polynomial has integral coefficients and regular Galois action isomorphic to (Z/mZ)^*/H. Choosing quotients of types C8, C4 x C2, and C2 x C2 x C2, and controlling whether -1 lies in H, supplies exact group structure together with r=8 or r=0. Composite conductors and several primitive linear combinations of periods can reach arithmetic examples absent from generic searches and can yield unusually small field discriminants. |
+| 9 | D | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | For q(x)=x^2+b*x+c, the generic polynomial q^3(x)-t usually realizes a large depth-three binary-tree action. Its proper subgroups are governed by square classes of critical-orbit differences q^j(gamma)-t, where gamma=-b/2. Setting t=q^j(gamma)-s^2 for one selected level j in {1,2,3}, after clearing denominators by an integral affine conjugation, forces one such square-class relation without forcing a rational root. Different levels cut different layers of the tree kernel and should reach rare 2-group and mixed imprimitive actions missed by the incumbent's three unrelated quadratic maps. |
+| 9 | E | no | implementation_failed |  |  |  |  |  | `solver_duplicate_within_call` | A compact covering array of squarefree factorization types at three small primes can force combinations of Frobenius cycle shapes that random coefficient shells encounter unevenly. Constructing coefficients by CRT from one irreducibility certificate and two independently selected cycle templates should enrich rare transitive-group regions, including primitive groups inaccessible to quadratic constructions. Among several centered CRT lifts of the same local template, selecting by low height and then low polynomial discriminant gives a natural, catalogue-independent chance of improving difficult field-discriminant records. |
+| 10 | A | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | The current quadratic towers mostly realize split or dihedral embedding problems. Solving the non-split central embedding problem over biquadratic fields instead should directly produce Q8 extensions, a qualitatively rare family absent from current coverage. Real and imaginary solutions of the same embedding problem should supply signatures 8 and 0 respectively. |
+| 10 | B | no | implementation_failed |  |  |  |  |  | `solver_call_timeout` | The tower family is useful, but sampling its last radicand blindly makes rare signatures unnecessarily scarce. In a real biquadratic field K=Q(sqrt(a),sqrt(b)), the four values of c=c0+c1 sqrt(a)+c2 sqrt(b)+c3 sqrt(ab) are explicit. Choosing c0 only after sorting the other embedding contributions can force exactly 4, 3, 2, 1, or 0 positive embeddings, hence an octic signature r=8,6,4,2, or 0 after adjoining sqrt(c). |
+| 10 | C | no | implementation_failed |  |  |  |  |  | `solver_top_level_call_forbidden` | For an elliptic curve E/Q, its eight cyclic subgroups of order seven form a transitive projective Galois set. A degree-eight resolvent whose roots are suitably normalized invariants of those kernels generically realizes a projective mod-7 image such as PGL(2,7), placing candidates in a rare primitive region plausibly responsible for an entirely missing group rather than another quadratic-tower group. |
+| 10 | D | no | preliminary_rejected | 39200.822000000000 | 52260.710500000001 | 0 | 0 |  | `rejected_no_measured_gain` | For q(x)=x^2+c, the generic polynomial q^3(x)-t has the full depth-three binary-tree action, while square classes of q^j(0)-t control successive index-two descents. Setting t=q^j(0)-s^2 for j in {1,2,3}, or imposing two compatible relations, should realize proper tree subgroups that random compositions almost never hit and that are plausible sources of missing mid-range groups. |
+| 10 | E | no | preliminary_rejected | 4011.000000000000 | 5011.000000000000 | 0 | 0 |  | `rejected_no_measured_gain` | The previous CRT idea failed operationally because templates collided, not because local Frobenius steering was disproved. An injectively indexed CRT lattice can combine an irreducibility certificate at one prime, two independent squarefree cycle types at other primes, and a nearby real-root geometry. Selecting underfilled signature-cycle cells should explore transitive-group regions missed by both structured towers and random shells. |
 
 ## Catalogue
 
@@ -54,55 +79,65 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T1 | 0 | 2147483648 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, 16, 0, 20, 0, 8, 0, 1` |
 | 8T1 | 8 | 2147483648 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, -16, 0, 20, 0, -8, 0, 1` |
 | 8T2 | 0 | 1265625 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 0, 1, -1, 1, 0, -1, 1` |
-| 8T2 | 8 | 1358954496 | `6746e8cd7253` | `6746e8cd7253` | `-2, -8, 12, 24, -30, -8, 20, -8, 1` |
+| 8T2 | 8 | 1024000000 | `6746e8cd7253` | `1b8da6e43715` | `1, 0, -12, 0, 19, 0, -8, 0, 1` |
 | 8T3 | 0 | 5308416 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 0, 0, -1, 0, 0, 0, 1` |
-| 8T3 | 8 | 12745506816 | `26be6d9b6a4a` | `26be6d9b6a4a` | `-188, -1376, 856, 1024, -672, -16, 76, -16, 1` |
+| 8T3 | 8 | 3317760000 | `26be6d9b6a4a` | `1b8da6e43715` | `1, -12, 16, 44, -7, -32, -6, 4, 1` |
 | 8T4 | 0 | 40960000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 0, 0, 3, 0, 0, 0, 1` |
-| 8T4 | 8 | 9475854336 | `26be6d9b6a4a` | `26be6d9b6a4a` | `9, 0, -90, 0, 115, 0, -22, 0, 1` |
+| 8T4 | 8 | 5473632256 | `26be6d9b6a4a` | `1b8da6e43715` | `16, 0, -64, 0, 73, 0, -18, 0, 1` |
 | 8T6 | 0 | 4102893 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 5, -6, 11, -6, 5, -1, 1` |
 | 8T6 | 2 | 4286875 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 1, -8, -1, -8, 1, -3, 1` |
 | 8T6 | 8 | 5156108238848 | `6746e8cd7253` | `6746e8cd7253` | `8, 0, -128, 0, 80, 0, -16, 0, 1` |
+| 8T7 | 0 | 327680000000 | `1b8da6e43715` | `1b8da6e43715` | `228912020, 18607200, -2104520, -36800, 992930, -320, -1980, 0, 1` |
 | 8T7 | 4 | 2147483648 | `17c37b95a32a` | `17c37b95a32a` | `2, 0, 0, 0, -12, 0, -8, 0, 1` |
+| 8T7 | 8 | 1565515579392 | `1b8da6e43715` | `1b8da6e43715` | `35765877042, 3764700576, -434549808, -25636896, 2212044, 19200, -2712, 0, 1` |
 | 8T8 | 2 | 268435456 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, 0, 0, -2, 0, 0, 0, 1` |
+| 8T8 | 8 | 736586891264 | `1b8da6e43715` | `1b8da6e43715` | `39545842, -42097328, 15146824, -2309536, 112620, 6864, -736, 0, 1` |
 | 8T9 | 0 | 3504384 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -3, 0, 2, 0, 0, 0, 1` |
 | 8T9 | 4 | 40960000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -6, 0, 7, 0, -4, 0, 1` |
-| 8T9 | 8 | 1467470577664 | `26be6d9b6a4a` | `26be6d9b6a4a` | `-153, 120, 626, -140, -413, -92, 30, 12, 1` |
+| 8T9 | 8 | 16845963264 | `26be6d9b6a4a` | `1b8da6e43715` | `9, 0, -42, 0, 43, 0, -12, 0, 1` |
 | 8T10 | 0 | 4000000 | `6746e8cd7253` | `6746e8cd7253` | `11, 46, 99, 132, 119, 74, 31, 8, 1` |
 | 8T10 | 4 | 67108864 | `17c37b95a32a` | `17c37b95a32a` | `-12703, -3648, 8156, -4352, 966, 320, -36, 0, 1` |
+| 8T10 | 8 | 861184000000 | `1b8da6e43715` | `1b8da6e43715` | `145, 0, -400, 200, 231, -256, 96, -16, 1` |
 | 8T11 | 0 | 5308416 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -4, 0, 5, 0, -2, 0, 1` |
 | 8T11 | 4 | 23040000 | `6746e8cd7253` | `6746e8cd7253` | `1, 12, 28, 32, 13, -8, -8, 0, 1` |
-| 8T11 | 8 | 38813099360256 | `6746e8cd7253` | `6746e8cd7253` | `25, 0, -128, 0, 80, 0, -16, 0, 1` |
+| 8T11 | 8 | 29859840000 | `6746e8cd7253` | `1b8da6e43715` | `1, 56, -62, -232, 445, -304, 100, -16, 1` |
 | 8T13 | 0 | 17850625 | `26be6d9b6a4a` | `798a8888bc31` | `1, -3, 7, -7, 13, -7, 7, -3, 1` |
 | 8T13 | 8 | 73116160000 | `26be6d9b6a4a` | `26be6d9b6a4a` | `1, 0, -348, 0, 198, 0, -28, 0, 1` |
 | 8T14 | 0 | 136048896 | `6746e8cd7253` | `6746e8cd7253` | `1, 2, 4, -2, 2, -2, 4, 2, 1` |
 | 8T14 | 8 | 13969863066384 | `26be6d9b6a4a` | `26be6d9b6a4a` | `441, 0, -11628, 0, 3886, 0, -124, 0, 1` |
-| 8T15 | 0 | 143327232 | `6746e8cd7253` | `6746e8cd7253` | `3, 0, 0, 0, -3, 0, 0, 0, 1` |
+| 8T15 | 0 | 31443200 | `6746e8cd7253` | `1b8da6e43715` | `1, 4, 11, 16, 21, 16, 11, 4, 1` |
 | 8T15 | 2 | 40960000 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, 2, 0, 5, 0, 4, 0, 1` |
 | 8T15 | 4 | 14670139392 | `6746e8cd7253` | `6746e8cd7253` | `1, 2, -5, -4, -5, -4, -5, 2, 1` |
-| 8T15 | 8 | 249362220897533952 | `6746e8cd7253` | `6746e8cd7253` | `13, 0, -128, 0, 80, 0, -16, 0, 1` |
+| 8T15 | 8 | 280944640000 | `6746e8cd7253` | `1b8da6e43715` | `-1, 8, 64, -4, -65, -16, 16, 8, 1` |
 | 8T16 | 0 | 20000000 | `6746e8cd7253` | `6746e8cd7253` | `1, 2, 3, 4, 5, -26, 23, -8, 1` |
 | 8T16 | 4 | 2147483648 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, 0, 0, -4, 0, 0, 0, 1` |
 | 8T17 | 0 | 1257728 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 5, -2, 9, -2, 5, 0, 1` |
+| 8T17 | 4 | 7842780125 | `1b8da6e43715` | `1b8da6e43715` | `1, 2, -4, -3, -12, -3, -4, 2, 1` |
+| 8T17 | 8 | 22632992000 | `1b8da6e43715` | `1b8da6e43715` | `-7, 6, 35, -16, -48, -4, 18, 8, 1` |
 | 8T18 | 0 | 9144576 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 2, 0, 0, 0, -1, 0, 1` |
 | 8T18 | 4 | 19360000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -9, 0, 12, 0, -6, 0, 1` |
 | 8T18 | 8 | 18604960000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -15, 0, 28, 0, -10, 0, 1` |
 | 8T19 | 0 | 67108864 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 0, 0, 4, 0, -4, 0, 1` |
-| 8T20 | 0 | 19394461696 | `17c37b95a32a` | `17c37b95a32a` | `23681, 8160, 4140, -2112, -122, 96, -20, 0, 1` |
+| 8T19 | 4 | 71057616666624 | `1b8da6e43715` | `1b8da6e43715` | `4877040669, -146616120, -77504248, 1164016, 449006, -1736, -1104, 0, 1` |
+| 8T20 | 0 | 26265625 | `17c37b95a32a` | `1b8da6e43715` | `1, 1, 10, -1, 19, -1, 10, 1, 1` |
 | 8T20 | 4 | 268435456 | `6746e8cd7253` | `6746e8cd7253` | `-2, 0, 16, 32, 16, -8, -8, 0, 1` |
+| 8T20 | 8 | 257966473216 | `1b8da6e43715` | `1b8da6e43715` | `-20363807, -27665392, -2941852, 703296, 97790, -2512, -588, 0, 1` |
 | 8T21 | 0 | 33554432 | `6746e8cd7253` | `6746e8cd7253` | `9, 0, -8, 8, 14, -32, 24, -8, 1` |
-| 8T21 | 4 | 8493465600000 | `17c37b95a32a` | `17c37b95a32a` | `-48735, -157320, -76020, 4080, 15064, -240, -244, 0, 1` |
+| 8T21 | 4 | 80564191232 | `17c37b95a32a` | `1b8da6e43715` | `-7, 0, 64, 128, 128, 80, 32, 8, 1` |
+| 8T21 | 8 | 725077721088 | `1b8da6e43715` | `1b8da6e43715` | `-7, 0, 64, 0, -64, 16, 16, -8, 1` |
 | 8T22 | 0 | 51840000 | `6746e8cd7253` | `6746e8cd7253` | `19, 58, 109, 136, 120, 74, 31, 8, 1` |
-| 8T22 | 4 | 815712436224 | `6746e8cd7253` | `6746e8cd7253` | `4, 0, 0, 0, -10, 0, 0, 0, 1` |
+| 8T22 | 4 | 3317760000 | `6746e8cd7253` | `1b8da6e43715` | `9, -216, 774, -1128, 877, -400, 108, -16, 1` |
 | 8T23 | 2 | 22665187 | `6746e8cd7253` | `6746e8cd7253` | `1, -12, 28, -39, 38, -25, 13, -4, 1` |
 | 8T24 | 0 | 1763584 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, -2, 1, -2, 1, 0, 1` |
 | 8T24 | 4 | 184090624 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 0, 0, -1, 0, -2, 0, 1` |
 | 8T24 | 8 | 89865650176 | `6746e8cd7253` | `6746e8cd7253` | `-1, 8, 32, -20, -49, -4, 18, 8, 1` |
 | 8T26 | 0 | 78675968 | `6746e8cd7253` | `6746e8cd7253` | `23, 86, 163, 192, 154, 86, 33, 8, 1` |
-| 8T26 | 2 | 163840000 | `6746e8cd7253` | `6746e8cd7253` | `-4, 0, -4, 0, 2, 0, 4, 0, 1` |
-| 8T26 | 4 | 43789058048 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, 0, 0, -5, 0, 0, 0, 1` |
+| 8T26 | 2 | 22478848 | `6746e8cd7253` | `1b8da6e43715` | `1, 0, -2, -8, -10, -8, -2, 0, 1` |
+| 8T26 | 4 | 17356605021 | `6746e8cd7253` | `1b8da6e43715` | `1, 1, -3, 4, -7, 4, -3, 1, 1` |
+| 8T26 | 8 | 4557385400148288 | `1b8da6e43715` | `1b8da6e43715` | `48, 136, -1041, -768, 4464, -2096, 386, -32, 1` |
 | 8T27 | 0 | 5328125 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 5, -4, 9, -4, 5, -1, 1` |
 | 8T27 | 2 | 196171875 | `6746e8cd7253` | `6746e8cd7253` | `1, 3, 3, 6, 5, 6, 3, 3, 1` |
-| 8T27 | 4 | 164000000 | `798a8888bc31` | `1b8da6e43715` | `1, -4, 5, -6, 9, -6, 5, -4, 1` |
+| 8T27 | 4 | 71303168 | `798a8888bc31` | `1b8da6e43715` | `-1, 4, -2, -8, 15, -16, 10, -4, 1` |
 | 8T27 | 6 | 380000000 | `6746e8cd7253` | `798a8888bc31` | `1, -6, 7, 2, -10, 8, 2, -4, 1` |
 | 8T27 | 8 | 2841328125 | `6746e8cd7253` | `6746e8cd7253` | `1, 12, -32, -51, 50, 99, 53, 12, 1` |
 | 8T28 | 0 | 90870848 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 5, -5, 6, -5, 5, -3, 1` |
@@ -110,15 +145,18 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T28 | 8 | 9697230848 | `6746e8cd7253` | `6746e8cd7253` | `8, -64, -48, 288, 60, -208, 92, -16, 1` |
 | 8T29 | 0 | 3504384 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, 0, 2, 0, 2, 0, 1` |
 | 8T29 | 4 | 134560000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 3, 0, -2, 0, -2, 0, 1` |
-| 8T29 | 8 | 150196986118144 | `798a8888bc31` | `798a8888bc31` | `57, 64, -256, -8, 337, -280, 98, -16, 1` |
+| 8T29 | 8 | 989818050816 | `798a8888bc31` | `1b8da6e43715` | `-3, -36, 87, 432, 550, 328, 102, 16, 1` |
 | 8T30 | 0 | 184146722816 | `6746e8cd7253` | `6746e8cd7253` | `14, 0, 16, 0, 12, 0, 4, 0, 1` |
 | 8T30 | 2 | 21434375 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 2, -5, 1, -5, 2, -1, 1` |
-| 8T31 | 0 | 4002048 | `6746e8cd7253` | `1b8da6e43715` | `1, -2, 7, -14, 18, -16, 10, -4, 1` |
-| 8T31 | 2 | 2717908992 | `6746e8cd7253` | `6746e8cd7253` | `-2, 0, -4, 0, 2, 0, 4, 0, 1` |
+| 8T30 | 4 | 368293445632 | `1b8da6e43715` | `1b8da6e43715` | `3598, 11520, 15456, 11424, 5128, 1440, 248, 24, 1` |
+| 8T30 | 8 | 123911940625 | `1b8da6e43715` | `1b8da6e43715` | `1, -15, 13, 46, -1, -26, -4, 4, 1` |
+| 8T31 | 0 | 1513728 | `6746e8cd7253` | `1b8da6e43715` | `1, 4, 9, 12, 12, 10, 8, 4, 1` |
+| 8T31 | 2 | 1268711424 | `6746e8cd7253` | `1b8da6e43715` | `-2, 4, -2, -8, 15, -16, 10, -4, 1` |
 | 8T31 | 4 | 1024524288 | `17c37b95a32a` | `1b8da6e43715` | `1, 0, -4, -8, -3, 4, 6, 4, 1` |
 | 8T31 | 6 | 2717908992 | `6746e8cd7253` | `6746e8cd7253` | `-2, 0, 4, 0, 2, 0, -4, 0, 1` |
-| 8T31 | 8 | 20316160000 | `6746e8cd7253` | `6746e8cd7253` | `31, 0, -72, 0, 48, 0, -12, 0, 1` |
+| 8T31 | 8 | 8668643328 | `6746e8cd7253` | `1b8da6e43715` | `193, 1120, 2524, 2920, 1917, 740, 166, 20, 1` |
 | 8T32 | 0 | 1142440000 | `6746e8cd7253` | `6746e8cd7253` | `1, 6, 15, -4, -5, 20, 22, 8, 1` |
+| 8T32 | 4 | 94197431056 | `1b8da6e43715` | `1b8da6e43715` | `1, -1, -7, 1, -4, 1, -7, -1, 1` |
 | 8T35 | 0 | 1820637 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 3, -2, 5, -2, 3, -1, 1` |
 | 8T35 | 2 | 4461875 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 7, -12, 13, -12, 7, -3, 1` |
 | 8T35 | 4 | 21550625 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 1, 6, -7, 2, 4, -4, 1` |
@@ -127,11 +165,12 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T38 | 0 | 374863125 | `6746e8cd7253` | `6746e8cd7253` | `9, 30, 91, 189, 225, 153, 59, 12, 1` |
 | 8T38 | 2 | 62804734776 | `6746e8cd7253` | `6746e8cd7253` | `1, -4, 3, -5, 2, -5, 3, -4, 1` |
 | 8T38 | 4 | 95328615285 | `1b8da6e43715` | `1b8da6e43715` | `1, 0, -3, 3, -7, 3, -3, 0, 1` |
-| 8T39 | 0 | 13424896 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, 0, 0, 0, 0, 0, 1` |
+| 8T39 | 0 | 11999296 | `6746e8cd7253` | `1b8da6e43715` | `1, 1, 1, -1, -2, -1, 1, 1, 1` |
 | 8T39 | 4 | 20502784 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -1, 0, 4, 0, -4, 0, 1` |
 | 8T39 | 8 | 323296862464 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -10, 0, 19, 0, -9, 0, 1` |
 | 8T40 | 0 | 89579520000 | `6746e8cd7253` | `6746e8cd7253` | `3, 0, 0, 0, 3, 0, -2, 0, 1` |
 | 8T40 | 2 | 49836032 | `6746e8cd7253` | `6746e8cd7253` | `1, -2, 2, -4, 5, -4, 2, -2, 1` |
+| 8T40 | 4 | 1839775223808 | `1b8da6e43715` | `1b8da6e43715` | `1, 6, 10, 8, 9, 8, 10, 6, 1` |
 | 8T41 | 0 | 3398389014784 | `6746e8cd7253` | `6746e8cd7253` | `5, 14, 11, 4, 8, 4, 2, 0, 1` |
 | 8T41 | 4 | 103539794176 | `6746e8cd7253` | `6746e8cd7253` | `3, -10, 9, -4, -4, 4, -2, 0, 1` |
 | 8T42 | 0 | 38340864 | `6746e8cd7253` | `6746e8cd7253` | `4, -4, 8, -8, 6, -4, 4, 0, 1` |

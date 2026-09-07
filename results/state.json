@@ -1,21 +1,20 @@
 {
   "accepted_solver_commit": "1b8da6e437155061b49d35469ba601d04ada71c2",
-  "discriminant_improvements_total": 123,
+  "discriminant_improvements_total": 147,
   "generation_feedback": {
     "avoid": [
-      "Treating E\u2019s or D\u2019s raw benchmark scores as evidence of discovery success despite zero fresh hits and zero discriminant improvements.",
-      "Claiming that S validates every family in its portfolio; the aggregate result provides no lane attribution.",
-      "Claiming B or C failed algebraically when they were pruned before benchmark evaluation.",
-      "Scaling the entire S portfolio uniformly without measuring each lane\u2019s verified yield, runtime, marginal novelty, and discriminant contribution.",
-      "Reusing the previous generation\u2019s A-centered diagnosis or its incompatible 4/83/56 metrics.",
-      "Inferring hidden seeds, missing-pair identities, or group signatures from the aggregate counts."
+      "Treating D\u2019s high benchmark score as evidence of discovery when all reported novelty metrics were zero.",
+      "Concluding that A, B, or C is mathematically unpromising from implementation failures alone.",
+      "Broadening D or E after their completed zero-novelty trials.",
+      "Using unrestricted solver calls or top-level solver calls that violate the evaluation interface.",
+      "Inferring hidden seeds, missing-pair identities, or desired group-signature combinations from these results."
     ],
-    "diagnosis": "S was the generation\u2019s only measured success: it found 1 fresh missing pair on 1 fresh seed and produced 4 discriminant improvements, earning acceptance. This supports the operational value of its protected, deterministically scheduled portfolio, but the aggregate metrics do not identify which construction lane produced the novelty or improvements. A\u2019s tower ablation was fully benchmarked and found no fresh pairs or discriminant improvements, so the proposed concentration of effort did not reproduce the prior generation\u2019s tower gains. D likewise produced no measured novelty or record improvements, while E\u2019s high raw scores also translated into zero discovery metrics. B and C were screen-pruned and remain untested rather than algebraically refuted. The supplied previous feedback refers to incompatible outcomes and should not be reused for this generation.",
-    "next_generation_direction": "Use S as the backbone, but instrument a deterministic leave-one-lane-out and quota-matched ablation of its tower, preimage-tree, relative-quartic, reciprocal, square-discriminant, and Eisenstein lanes. Record per-lane verified outputs, marginal fresh hits after global deduplication, seed reach, discriminant improvements, and runtime; then retain the smallest complementary mixture that reproduces S\u2019s discovery while preserving a separately capped record-refinement quota.",
+    "diagnosis": "The incumbent wins because this generation produced no measured coverage gain. D and E were the only candidates to complete preliminary evaluation; both recorded 0 fresh missing pairs, 0 fresh pair hits, 0 fresh seed hits, and no discriminant improvements. D achieved strong raw scores (39200.822 screen; 52260.7105 benchmark), showing that its critical-orbit construction generated substantial valid material, but that material overlapped existing coverage. E also ran successfully but scored much lower (4011 screen; 5011 benchmark) and likewise added no novelty. A, B, and C were not evaluated: A timed out during the AI call, B during the solver call, and C violated the top-level solver-call constraint. These are operational failures, not evidence against their mathematical hypotheses. Overall, the generation favored ambitious constructions without first ensuring that each could complete a small, deterministic test.",
+    "next_generation_direction": "Rescue B as a deterministic micro-benchmark because its signature control is explicit and requires little solver work. Fix two or three small real biquadratic fields, enumerate bounded integer triples for the nonconstant coefficients of c, compute the four embedding contributions directly, and select the constant coefficient from the exact intervals that force each desired positivity count. Expand no more than 10 resulting octics, apply cheap squarefreeness and irreducibility filters, and give each survivor a strict verification timeout. Record completion count, runtime, realized signatures, fresh pair and seed hits, and discriminant improvements. Retire the construction if this fixed quota completes with zero novelty; do not enlarge the search beforehand.",
     "what_worked": [
-      "S combined one fresh discovery with 4 discriminant improvements, the strongest relevant result in the generation.",
-      "Protected family quotas and deterministic weighted scheduling plausibly preserved complementary search lanes, although lane-level attribution was not recorded.",
-      "S demonstrated that discovery and record refinement can coexist when discriminant minimization remains a late, within-cell tie-break."
+      "D\u2019s critical-orbit specialization completed screening and benchmarking and produced the generation\u2019s strongest raw scores.",
+      "E\u2019s injectively indexed CRT construction avoided the previously reported duplicate-within-call failure and reached preliminary evaluation.",
+      "The candidates explored genuinely distinct structural regions: quaternion extensions, signature-controlled quadratic towers, projective mod-7 resolvents, arboreal subgroups, and locally steered CRT polynomials."
     ]
   },
   "incumbent_benchmark": {
@@ -33,12 +32,12 @@
     "verified_fraction": 0.84
   },
   "incumbent_solver_hash": "75219ff98e52d669f68adc6409a0b6b6cdf4ab7680e91e59ab8b4b43dbf45b9b",
-  "last_new_pair_at": 81988,
+  "last_new_pair_at": 246988,
   "last_solver_change_at": 77988,
-  "last_stop_code": "completed",
-  "next_generation": 6,
-  "next_search_batch": 87,
+  "last_stop_code": "research_infrastructure_failure",
+  "next_generation": 11,
+  "next_search_batch": 108,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 86988,
+  "search_candidates_total": 296988,
   "version": 5
 }
