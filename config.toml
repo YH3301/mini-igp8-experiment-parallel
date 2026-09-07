@@ -55,9 +55,9 @@ max_checks_per_search_batch = 4
 # Sage calls are telemetry only and never stop a session.
 max_ai_calls_per_session = 45
 max_wall_minutes_per_session = 360
-ai_call_seconds = 900
+ai_call_seconds = 360
 solver_call_seconds = 30
-search_solver_call_seconds = 120
+search_solver_call_seconds = 60
 verification_seconds = 30
 verification_workers = 4
 # 10 progress lines for a 10k public batch instead of 100.
@@ -67,8 +67,8 @@ progress_every_candidates = 5000
 researcher = "gpt-5.6-sol"
 researcher_reasoning = "high"
 implementer = "gpt-5.6-terra"
-implementer_reasoning = "medium"
-synthesizer = "gpt-5.6-sol"
+implementer_reasoning = "high"
+synthesizer = "gpt-5.6-terra"
 synthesizer_reasoning = "high"
 critic = "gpt-5.6-sol"
 critic_reasoning = "high"
