@@ -1,45 +1,44 @@
 {
-  "accepted_solver_commit": "f2d590cfc1525fef2a6e981016852a701417f201",
-  "discriminant_improvements_total": 166,
+  "accepted_solver_commit": "3d4531e730f382c3fce9c9fd801809836b134010",
+  "discriminant_improvements_total": 167,
   "generation_feedback": {
     "avoid": [
-      "Selecting families by raw benchmark score alone; C had the highest score but zero fresh hits.",
-      "Expanding C broadly before it demonstrates novelty under a small fixed quota.",
-      "Treating A and E\u2019s AI-call timeouts as mathematical refutations.",
-      "Assuming B, D, and S found different hidden pairs; the reported data does not identify them.",
-      "Claiming that no discriminant improvements occurred when the relevant fields are blank.",
-      "Letting S\u2019s 53 repeated hits obscure that it added only one unique missing pair."
+      "Continuing to allocate the main budget to the same tested Q8/biquadratic strata solely because A succeeded in the previous generation.",
+      "Treating A\u2019s strong benchmark score as evidence of coverage gain when all novelty metrics were zero.",
+      "Reviving B\u2019s signature-chamber strategy or S\u2019s combined lanes without a materially new structural mechanism.",
+      "Claiming that C or E failed mathematically; both were screening-pruned before benchmarking.",
+      "Drawing conclusions about discriminants from blank improvement fields.",
+      "Inferring hidden pair identities, seed identities, or overlap among candidates."
     ],
-    "diagnosis": "S won on measured discovery efficiency, not raw benchmark score. It produced 1 fresh missing pair and 53 fresh pair/seed hits, far exceeding B and D\u2019s 3 hits while preserving their shared 1-pair novelty. This supports combining B\u2019s signature chambers with D\u2019s square-class constraints as a focused engine. C achieved the highest benchmark score (61280.8055) but recorded zero novelty, so its Gaussian-period family mainly reproduced existing coverage. B demonstrated genuine novelty but was pruned after relatively low screen and benchmark scores. D also found the same amount of unique novelty with stronger scores, making it the better backbone. A and E failed through AI-call timeouts; those outcomes say nothing conclusive about their mathematical hypotheses. No discriminant conclusion is possible because every discriminant-improvement field is blank.",
-    "next_generation_direction": "Run a fixed-budget ablation of S\u2019s constraint-aware tower engine. On the same small list of biquadratic bases, test three explicitly separated batches: sign-chamber control only, square-class-relation control only, and their joint constraints. Cap each batch at ten expanded octics, deduplicate before expensive verification, impose strict per-polynomial timeouts, and record completion rate, realized signatures, distinct fresh pairs, total fresh hits, seeds, and discriminant results. Retain only joint constraint templates that add distinct novelty rather than repeatedly hitting the already observed pair; keep Gaussian periods to one tiny canary batch and do not enlarge A, C, or E until they pass similarly bounded completion tests.",
+    "diagnosis": "The generation produced no measured gain: every benchmarked candidate recorded 0 fresh missing pairs, 0 fresh-pair hits, and 0 fresh-seed hits, so the incumbent correctly remained the winner. A and D achieved the strongest challenger benchmark scores (both about 33,170.94), but neither converted that performance into novelty. This is especially important for A: its cocycle-certified Q8 approach was the previous generation\u2019s clear source of new coverage, yet the present diversification produced nothing new, suggesting diminishing returns or exhaustion in the tested strata rather than disproving the construction generally. B again produced no fresh hits, while S\u2019s combined engine also added no novelty and scored substantially below A and D. C and E were removed during screening, so their cyclic-quartic and generic-octic hypotheses remain untested. Blank discriminant fields support no conclusion about discriminant quality.",
+    "next_generation_direction": "Run a focused, quota-protected test of C\u2019s cyclic-quartic tower construction as the next orthogonal structural family. Build a small certificate-driven matrix over C4-stable square-class ranks, norm relations, and feasible signatures; reserve enough budget for completed Galois-group verification so it cannot be eliminated purely by incumbent-biased screening. Deduplicate before verification, impose per-polynomial timeouts, and log completion rate, explicit observed pair identifiers, signatures, unique fresh-pair yield, seed coverage, and discriminants. Keep only a small A/Q8 control lane to measure whether its previously productive family is now saturated.",
     "what_worked": [
-      "S converted the B/D synthesis into 53 fresh hits while discovering a fresh missing pair.",
-      "Both B and D independently demonstrated that constrained biquadratic towers can reach novel coverage.",
-      "D supplied substantially stronger screening and benchmark performance than B, supporting its use as the main implementation backbone.",
-      "C completed reliably and generated substantial valid material, making a small structural-canary role reasonable even though it added no coverage."
+      "A and D remained computationally competitive, posting the highest challenger benchmark scores.",
+      "The pipeline correctly rejected high-scoring candidates that failed to add distinct missing pairs.",
+      "Screening and staged pruning limited investment in weaker candidates, although it also left C and E scientifically unresolved."
     ]
   },
   "incumbent_benchmark": {
     "candidate_slots": 2000,
-    "groups": 23,
-    "pairs": 51,
-    "sage_calls": 1990,
-    "score": 51230.927,
+    "groups": 28,
+    "pairs": 53,
+    "sage_calls": 1967,
+    "score": 53280.928,
     "status_counts": {
-      "duplicate_candidate": 10,
-      "reducible": 136,
-      "verified": 1854
+      "duplicate_candidate": 33,
+      "reducible": 111,
+      "verified": 1856
     },
-    "verified": 1854,
-    "verified_fraction": 0.927
+    "verified": 1856,
+    "verified_fraction": 0.928
   },
-  "incumbent_solver_hash": "49ec43e1659b1f8087ae8df4950098ab738edadcace9207693cbe22e976e11d8",
-  "last_new_pair_at": 306189,
-  "last_solver_change_at": 296988,
+  "incumbent_solver_hash": "14ff07152c06172468aeb36db9f43dac68b956733985ccef37c0d42c175c5d1d",
+  "last_new_pair_at": 367452,
+  "last_solver_change_at": 358834,
   "last_stop_code": "completed",
-  "next_generation": 12,
-  "next_search_batch": 115,
+  "next_generation": 14,
+  "next_search_batch": 122,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 358834,
+  "search_candidates_total": 418873,
   "version": 5
 }
