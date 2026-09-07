@@ -15,3 +15,4 @@ build/
 dist/
 *.tmp
 /.mini-igp8-research.lock
+/candidates/current/
