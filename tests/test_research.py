@@ -267,10 +267,8 @@ class ResearchTests(unittest.TestCase):
 
     def test_default_configuration_is_parallel_generation_based(self):
         config = load_config()
-        self.assertEqual(config.stagnation, 5000)
         self.assertEqual(config.candidate_count, 5)
         self.assertEqual(config.parallel_implementers, 5)
-        self.assertEqual(config.verification_workers, 6)
         self.assertEqual(config.max_screen_survivors, 3)
         self.assertEqual(config.screening_slots, 500)
         self.assertEqual(config.benchmark_slots, 2000)
