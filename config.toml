@@ -26,7 +26,7 @@ candidates_per_seed = 100
 [comparison]
 # Preliminary race shared by the incumbent and every surviving candidate.
 master_seed = 20260906
-round_seed_counts = [10, 20, 30]
+round_seed_counts = [5, 10, 15]
 candidates_per_seed = 100
 oversample_factor = 2
 
