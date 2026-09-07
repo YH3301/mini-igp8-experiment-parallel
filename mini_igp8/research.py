@@ -5,9 +5,7 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
-import shutil
 import subprocess
-import sys
 import time
 import tomllib
 import uuid
@@ -20,12 +18,14 @@ from .codex import CodexClient, CodexFailure, TokenUsage, ensure_codex
 from .evaluator import (
     EvaluationDeadlineExceeded,
     SolverError,
+    configure_verification_workers,
     evaluate_fixed,
     evaluate_fresh,
     evaluate_search_batch,
     load_target_pairs,
     solver_sha256,
     summarize_fresh_records,
+    shutdown_verification_workers,
     validate_solver_contract,
 )
 from .storage import (
@@ -143,11 +143,11 @@ class Config:
     final_max_challengers_after_round1: int
     continue_after_full_coverage: bool
     discriminant_checks_per_batch: int
-    discriminant_checks_per_finalist: int
     max_ai: int
     max_seconds: int
     ai_seconds: int
     solver_seconds: int
+    search_solver_seconds: int
     verification_seconds: int
     verification_workers: int
     progress_every: int
@@ -169,22 +169,9 @@ class Config:
         return len(self.benchmark_seeds) * self.benchmark_size
 
     @property
-    def preliminary_slots_per_solver(self) -> int:
-        return sum(self.fresh_round_seed_counts) * self.fresh_size
-
-    @property
-    def final_slots_per_solver(self) -> int:
-        return sum(self.final_round_seed_counts) * self.final_size
-
-    @property
     def minimum_generation_ai_calls(self) -> int:
         # researcher + all Terra candidates + end-of-generation critic
         return 1 + self.candidate_count + 1
-
-    @property
-    def full_generation_ai_calls(self) -> int:
-        # plus Sol synthesis + Terra synthesis implementation
-        return self.minimum_generation_ai_calls + 2
 
 
 def _positive(value: object, name: str) -> int:
@@ -220,8 +207,8 @@ def _positive_tuple(values: object, name: str) -> tuple[int, ...]:
 def load_config(path: Path = CONFIG_FILE) -> Config:
     with path.open("rb") as stream:
         raw = tomllib.load(stream)
-    if raw.get("version") != 5:
-        raise ValueError("config_version_not_5")
+    if raw.get("version") != 6:
+        raise ValueError("config_version_not_6")
     search = raw["search"]
     generation = raw["generation"]
     screening = raw["screening"]
@@ -231,7 +218,6 @@ def load_config(path: Path = CONFIG_FILE) -> Config:
     discriminants = raw["discriminants"]
     limits = raw["limits"]
     models = raw["models"]
-    parallel = raw.get("parallel", {"verification_workers": 1})
 
     efforts = {"low", "medium", "high", "xhigh"}
     for key in (
@@ -295,21 +281,20 @@ def load_config(path: Path = CONFIG_FILE) -> Config:
             discriminants["max_checks_per_search_batch"],
             "discriminants.max_checks_per_search_batch",
         ),
-        discriminant_checks_per_finalist=_nonnegative(
-            discriminants["max_checks_per_finalist"],
-            "discriminants.max_checks_per_finalist",
-        ),
         max_ai=max_ai,
         max_seconds=60 * _positive(
             limits["max_wall_minutes_per_session"], "limits.max_wall_minutes_per_session"
         ),
         ai_seconds=_positive(limits["ai_call_seconds"], "limits.ai_call_seconds"),
         solver_seconds=_positive(limits["solver_call_seconds"], "limits.solver_call_seconds"),
+        search_solver_seconds=_positive(
+            limits["search_solver_call_seconds"], "limits.search_solver_call_seconds"
+        ),
         verification_seconds=_positive(
             limits["verification_seconds"], "limits.verification_seconds"
         ),
         verification_workers=_positive(
-            parallel["verification_workers"], "parallel.verification_workers"
+            limits["verification_workers"], "limits.verification_workers"
         ),
         progress_every=_positive(
             limits["progress_every_candidates"], "limits.progress_every_candidates"
@@ -416,84 +401,45 @@ def acceptance_decision(
     proposal_benchmark: dict,
     incumbent_fresh: dict,
     proposal_fresh: dict,
-    incumbent_discriminants: dict | None = None,
-    proposal_discriminants: dict | None = None,
 ) -> tuple[bool, str]:
-    """Lexicographic objective: missing pairs first, discriminants second, benchmark third."""
+    """Final lexicographic decision: missing-pair evidence, then benchmark."""
 
     old_fresh = int(incumbent_fresh.get("fresh_new_pairs", 0))
     new_fresh = int(proposal_fresh.get("fresh_new_pairs", 0))
     if new_fresh != old_fresh:
-        return (new_fresh > old_fresh, "accepted_discovery_gain" if new_fresh > old_fresh else "rejected_fresh_discovery_regression")
+        return (
+            new_fresh > old_fresh,
+            "accepted_discovery_gain" if new_fresh > old_fresh else "rejected_fresh_discovery_regression",
+        )
 
     old_seed_hits = int(incumbent_fresh.get("fresh_seed_hits", 0))
     new_seed_hits = int(proposal_fresh.get("fresh_seed_hits", 0))
     if new_seed_hits != old_seed_hits:
-        return (new_seed_hits > old_seed_hits, "accepted_seed_consistency_gain" if new_seed_hits > old_seed_hits else "rejected_seed_consistency_regression")
+        return (
+            new_seed_hits > old_seed_hits,
+            "accepted_seed_consistency_gain" if new_seed_hits > old_seed_hits else "rejected_seed_consistency_regression",
+        )
 
     old_pair_hits = int(incumbent_fresh.get("fresh_pair_hits", 0))
     new_pair_hits = int(proposal_fresh.get("fresh_pair_hits", 0))
     if new_pair_hits != old_pair_hits:
-        return (new_pair_hits > old_pair_hits, "accepted_missing_pair_hit_gain" if new_pair_hits > old_pair_hits else "rejected_missing_pair_hit_regression")
+        return (
+            new_pair_hits > old_pair_hits,
+            "accepted_missing_pair_hit_gain" if new_pair_hits > old_pair_hits else "rejected_missing_pair_hit_regression",
+        )
 
     paired = paired_race_metrics(incumbent_fresh, proposal_fresh)
     if paired["proposal_seed_wins"] != paired["incumbent_seed_wins"]:
         accepted = paired["proposal_seed_wins"] > paired["incumbent_seed_wins"]
-        return accepted, "accepted_paired_seed_win_gain" if accepted else "rejected_paired_seed_win_regression"
-
-    old_disc = incumbent_discriminants or {}
-    new_disc = proposal_discriminants or {}
-    old_count = int(old_disc.get("improvements", 0))
-    new_count = int(new_disc.get("improvements", 0))
-    if new_count != old_count:
-        return (new_count > old_count, "accepted_discriminant_improvement_gain" if new_count > old_count else "rejected_discriminant_improvement_regression")
-    if new_count > 0:
-        old_ratio = float(old_disc.get("best_ratio", 1.0))
-        new_ratio = float(new_disc.get("best_ratio", 1.0))
-        if new_ratio != old_ratio:
-            return (new_ratio < old_ratio, "accepted_discriminant_magnitude_gain" if new_ratio < old_ratio else "rejected_discriminant_magnitude_regression")
+        return accepted, (
+            "accepted_paired_seed_win_gain" if accepted else "rejected_paired_seed_win_regression"
+        )
 
     old_score = float(incumbent_benchmark["score"])
     new_score = float(proposal_benchmark["score"])
     if new_score > old_score:
         return True, "accepted_benchmark_gain"
     return False, "rejected_no_measured_gain"
-
-
-def race_checkpoint_decision(
-    incumbent_benchmark: dict,
-    proposal_benchmark: dict,
-    incumbent_fresh: dict,
-    proposal_fresh: dict,
-    *,
-    round_index: int,
-    total_rounds: int,
-) -> tuple[str, str]:
-    if round_index >= total_rounds - 1:
-        accepted, reason = acceptance_decision(
-            incumbent_benchmark, proposal_benchmark, incumbent_fresh, proposal_fresh
-        )
-        return ("accept" if accepted else "reject"), reason
-
-    paired = paired_race_metrics(incumbent_fresh, proposal_fresh)
-    distinct_margin = paired["proposal_distinct_missing_pairs"] - paired["incumbent_distinct_missing_pairs"]
-    seed_win_margin = paired["proposal_seed_wins"] - paired["incumbent_seed_wins"]
-    hit_margin = paired["proposal_pair_hits"] - paired["incumbent_pair_hits"]
-
-    if round_index == 0:
-        if (
-            paired["proposal_seed_hits"] == 0 and paired["incumbent_seed_hits"] >= 3
-        ) or (distinct_margin <= -2 and seed_win_margin <= -3 and hit_margin <= -3):
-            return "reject", "rejected_clear_round1_regression"
-        return "continue", "race_requires_more_evidence"
-
-    if distinct_margin >= 2 and seed_win_margin >= 3 and hit_margin >= 3:
-        return "accept", "accepted_clear_round2_gain"
-    if distinct_margin <= -2 and seed_win_margin <= -3 and hit_margin <= -3:
-        return "reject", "rejected_clear_round2_regression"
-    if paired["proposal_seed_hits"] == 0 and paired["incumbent_seed_hits"] >= 4:
-        return "reject", "rejected_no_missing_pair_seed_hits"
-    return "continue", "race_requires_more_evidence"
 
 
 def _changed_paths(root: Path) -> list[str]:
@@ -517,18 +463,6 @@ def _safe_working_tree(root: Path) -> None:
         raise ResearchStop("working_tree_has_manual_changes", ",".join(unexpected))
 
 
-def _full_tests(root: Path) -> None:
-    try:
-        completed = subprocess.run(
-            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
-            cwd=root, capture_output=True, text=True, check=False, timeout=120,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise ResearchStop("repository_self_test_timeout") from exc
-    if completed.returncode:
-        detail = "\n".join((completed.stdout + completed.stderr).splitlines()[-14:])
-        raise ResearchStop("repository_self_test_failed", detail)
-
 
 def _metric_summary(summary: dict) -> dict:
     keys = (
@@ -546,18 +480,45 @@ def _experiment_row(**values: object) -> dict:
 
 
 def _initialize_workspace(path: Path, solver_source: str, task_text: str) -> None:
-    """Create one disposable, isolated workspace for an AI candidate."""
+    """Prepare one persistent candidate lineage.
+
+    ``solver.py`` survives across generations.  The nested Git repository is
+    only a lightweight safety boundary so Codex can edit one file and failed
+    implementations can be rolled back cleanly.
+    """
 
     path.mkdir(parents=True, exist_ok=True)
-    (path / "solver.py").write_text(solver_source, encoding="utf-8")
+    solver_path = path / "solver.py"
+    if not solver_path.exists():
+        solver_path.write_text(solver_source, encoding="utf-8")
+
     (path / "TASK.md").write_text(task_text, encoding="utf-8")
     (path / ".gitignore").write_text("__pycache__/\n*.pyc\n", encoding="utf-8")
-    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
-    subprocess.run(["git", "config", "user.name", "Mini-IGP8 Candidate"], cwd=path, check=True)
-    subprocess.run(["git", "config", "user.email", "candidate@invalid.local"], cwd=path, check=True)
-    subprocess.run(["git", "add", "."], cwd=path, check=True)
-    subprocess.run(["git", "commit", "-qm", "candidate baseline"], cwd=path, check=True)
 
+    if not (path / ".git").exists():
+        subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+        subprocess.run(["git", "config", "user.name", "Mini-IGP8 Candidate"], cwd=path, check=True)
+        subprocess.run(["git", "config", "user.email", "candidate@invalid.local"], cwd=path, check=True)
+
+    # Make the current lineage state the clean baseline before Terra edits it.
+    subprocess.run(["git", "add", "solver.py", "TASK.md", ".gitignore"], cwd=path, check=True)
+    subprocess.run(
+        ["git", "commit", "--allow-empty", "-qm", "candidate checkpoint"],
+        cwd=path,
+        check=True,
+    )
+
+
+def _commit_candidate_workspace(path: Path, message: str) -> None:
+    subprocess.run(["git", "add", "solver.py"], cwd=path, check=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-qm", message], cwd=path, check=True)
+
+
+def _restore_candidate_workspace(path: Path) -> None:
+    """Roll a failed candidate edit back to its last checkpoint."""
+
+    subprocess.run(["git", "reset", "--hard", "HEAD"], cwd=path, check=False, capture_output=True)
+    subprocess.run(["git", "clean", "-fd"], cwd=path, check=False, capture_output=True)
 
 def _initialize_readonly_workspace(path: Path, role: str) -> None:
     path.mkdir(parents=True, exist_ok=True)
@@ -613,7 +574,7 @@ def _research_prompt(store: Store, state: dict, config: Config) -> str:
         "evaluation_shape": {
             "five_parallel_terra_candidates": True,
             "screening_slots_per_candidate": config.screening_slots,
-            "frozen_benchmark_slots_per_survivor": config.benchmark_slots,
+            "frozen_benchmark_slots_per_finalist": config.benchmark_slots,
             "preliminary_fresh_seeds_max": sum(config.fresh_round_seed_counts),
             "final_fresh_seeds_max": sum(config.final_round_seed_counts),
             "exact_hidden_seed_values": "withheld",
@@ -621,8 +582,9 @@ def _research_prompt(store: Store, state: dict, config: Config) -> str:
     }
     rules = """
 You are the lead mathematical researcher for one Mini-IGP8 generation. Produce EXACTLY five
-meaningfully different hypotheses A-E for five independent Terra implementers. Do not give five
-small parameter tweaks of the same idea.
+meaningfully different hypotheses A-E for five independent persistent Terra candidate lineages.
+Do not give five small parameter tweaks of the same idea. Each hypothesis should be implementable
+cleanly; unnecessary algorithmic/code complexity is a mild negative.
 
 Primary objective: discover currently missing degree-8 target pairs (8Tn,r), especially entire
 missing transitive groups and missing signatures. Secondary objective: when it comes naturally,
@@ -639,12 +601,6 @@ The solver contract is only: generate exactly budget UNIQUE deterministic monic 
 vectors [a0,...,a8], with a8=1 and a0!=0. There is no coefficient magnitude bound and no symmetry
 requirement. Never hard-code catalogue polynomials, target answers, or hidden seeds. Use the prior
 generation critic and measured history. Return the required JSON only.
-
-Do not treat solver evolution as monotone code accumulation.
-
-When introducing a new construction or search family, consider replacing or removing mechanisms that have shown little measured value. Keep the solver conceptually coherent. A shorter/faster solver with equal or better missing-pair performance is preferable to a larger solver.
-
-Candidate generation runtime is part of solver quality. Do not trade a modest statistical gain for a dramatic slowdown unless the gain is in genuinely rare missing target pairs.
 """.strip()
     return rules + "\n\nEXPERIMENT CONTEXT\n" + json.dumps(context, sort_keys=True)
 
@@ -656,15 +612,11 @@ def _candidate_rank(candidate: dict, incumbent_fresh: dict) -> tuple:
     if fresh.get("_fresh_seed_pair_counts") and incumbent_fresh.get("_fresh_seed_pair_counts"):
         paired = paired_race_metrics(incumbent_fresh, fresh)
         paired_margin = paired["proposal_seed_wins"] - paired["incumbent_seed_wins"]
-    disc = candidate.get("discriminants") or {}
-    best_ratio = float(disc.get("best_ratio", 1.0))
     return (
         int(fresh.get("fresh_new_pairs", 0)),
         int(fresh.get("fresh_seed_hits", 0)),
         int(fresh.get("fresh_pair_hits", 0)),
         paired_margin,
-        int(disc.get("improvements", 0)),
-        -best_ratio,
         float(benchmark.get("score", 0.0)),
     )
 
@@ -677,7 +629,6 @@ class ResearchController:
         llm: CodexClient | None = None,
         verifier=verify,
         field_discriminant_fn=field_discriminant,
-        run_tests=_full_tests,
         progress: Callable[[str], None] | None = None,
     ):
         self.root = Path(root).resolve()
@@ -686,7 +637,6 @@ class ResearchController:
         self.llm = llm or CodexClient()
         self.verifier = verifier
         self.field_discriminant_fn = field_discriminant_fn
-        self.run_tests = run_tests
         self.progress = progress or (lambda _message: None)
         self.solver_file = self.root / "mini_igp8" / "solver.py"
         self.candidate_root = self.root / "candidates" / "current"
@@ -706,17 +656,18 @@ class ResearchController:
             after.reasoning_tokens - before.reasoning_tokens,
         )
 
-    def _cleanup_candidate_workspace(self) -> None:
-        if self.candidate_root.exists():
-            shutil.rmtree(self.candidate_root)
 
     def _validate_solver(self, path: Path) -> None:
+        # Contract validation measures one normal solver-sized generation, not
+        # the entire 10k public search batch. Large search batches are a
+        # controller concern and must not turn the solver contract into a
+        # 10k/20k timeout test.
         validate_solver_contract(
             path,
             timeout_seconds=self.config.solver_seconds,
             known_polynomials=self.store.known_polynomials(),
             held_out_seeds=set(self.config.benchmark_seeds) | set(self.config.screening_seeds),
-            stress_budget=self.config.batch_size * self.config.search_oversample,
+            stress_budget=2000,
         )
 
     def _ensure_run_identity(self, state: dict) -> None:
@@ -786,7 +737,6 @@ class ResearchController:
             candidates_per_seed=self.config.benchmark_size,
             solver_seconds=self.config.solver_seconds,
             verification_seconds=self.config.verification_seconds,
-            workers=self.config.verification_workers,
             verifier=self.verifier,
             deadline=budget.deadline,
             progress=self._stage_progress("baseline benchmark"),
@@ -823,7 +773,7 @@ class ResearchController:
         self.store.save_state(state)
         self.store.append_history("baseline_public_catalogue_unchanged", {"source_event": event}, session_id=session_id)
 
-    def _ask_researcher(self, state: dict, budget: Budget, generation_dir: Path) -> tuple[dict, TokenUsage]:
+    def _ask_researcher(self, state: dict, budget: Budget, generation_dir: Path) -> dict:
         workspace = generation_dir / "researcher"
         _initialize_readonly_workspace(workspace, "lead researcher")
         ensure_codex()
@@ -844,19 +794,34 @@ class ResearchController:
         ids = [item.get("candidate_id") for item in hypotheses]
         if sorted(ids) != ["A", "B", "C", "D", "E"]:
             raise ResearchStop("researcher_candidate_ids_invalid", str(ids))
-        return response.data, response.usage
+        return response.data
 
-    def _implement_worker(self, hypothesis: dict, workspace: Path, timeout: float) -> tuple[str, TokenUsage]:
-        source = self.solver_file.read_text(encoding="utf-8")
-        task = (
-            "Edit solver.py only. Implement the supplied hypothesis faithfully. Do not create files, commit, "
-            "read the parent repository, hard-code target answers, catalogue polynomials, or hidden seeds.\n\n"
+    def _implement_worker(
+        self, hypothesis: dict, workspace: Path, timeout: float
+    ) -> tuple[str, TokenUsage]:
+        incumbent_source = self.solver_file.read_text(encoding="utf-8")
+        candidate_solver = workspace / "solver.py"
+        previous_source = (
+            candidate_solver.read_text(encoding="utf-8")
+            if candidate_solver.exists()
+            else incumbent_source
+        )
+
+        task_text = (
+            f"Persistent candidate {hypothesis['candidate_id']} lineage.\n\n"
+            "Update the existing solver.py for this generation. Preserve useful "
+            "mechanisms, but replace or remove obsolete/slow ones.\n\n"
             + json.dumps(hypothesis, indent=2, sort_keys=True)
         )
-        _initialize_workspace(workspace, source, task)
+        _initialize_workspace(workspace, previous_source, task_text)
+        previous_source = candidate_solver.read_text(encoding="utf-8")
+
         prompt = json.dumps({
             "role": "parallel Terra implementer",
-            "task": "Edit solver.py only and implement this one hypothesis as a production candidate.",
+            "task": (
+                "Edit solver.py only. Continue this persistent candidate lineage and "
+                "implement the supplied hypothesis as a production-quality search strategy."
+            ),
             "hypothesis": hypothesis,
             "contract": {
                 "format": "exactly budget unique monic degree-8 integer vectors [a0,...,a8]",
@@ -865,10 +830,15 @@ class ResearchController:
             },
             "priorities": [
                 "Missing target-pair discovery is primary.",
-                "Smaller field discriminants for solved pairs are secondary.",
-                "Keep coefficient generation fast: 2,000 candidates must complete comfortably within the solver timeout.",
-                "Use bounded deterministic generation; avoid unbounded rejection loops or expensive algebraic verification inside solver.py.",
+                "Smaller field discriminants for solved pairs are a secondary public-search objective.",
+                "Preserve useful lineage mechanisms, but do not accumulate code merely because it already exists.",
+                "Keep generate_candidates fast; 2,000 candidates must complete comfortably inside the solver timeout.",
+                "Use bounded deterministic generation. Do not perform Galois-group or number-field computations inside solver.py.",
                 "Edit solver.py only; do not create files or commit.",
+                "Write readable conventional Python with descriptive names and short helpers.",
+                "Explain non-obvious mathematical constructions, hashing/mixing functions, and numerical tricks with brief comments or docstrings.",
+                "Do not use semicolon-chained statements, multiple statements on one line, code golf, or deliberately minified code.",
+                "Prefer a smaller/faster coherent solver over a larger solver with comparable measured performance.",
             ],
         }, sort_keys=True)
 
@@ -880,12 +850,11 @@ class ResearchController:
             sandbox="workspace-write",
             timeout=timeout,
         )
-
         changed = _changed_paths(workspace)
         if changed != ["solver.py"]:
             raise SolverError(f"implementer_changed_forbidden_paths:{changed}")
-        proposed = (workspace / "solver.py").read_text(encoding="utf-8")
-        if proposed == source:
+        proposed = candidate_solver.read_text(encoding="utf-8")
+        if proposed == previous_source:
             raise SolverError("implementer_made_no_change")
         return proposed, response.usage
 
@@ -929,8 +898,13 @@ class ResearchController:
                     self._validate_solver(candidate["path"])
                     candidate["status"] = "implemented"
                     candidate["reason"] = "implemented"
+                    _commit_candidate_workspace(
+                        candidate["workspace"],
+                        f"candidate {candidate['id']} implementation",
+                    )
                     self._say(f"candidate {candidate['id']}: implementation and contract validation passed")
                 except (CodexFailure, SolverError, OSError, ValueError) as exc:
+                    _restore_candidate_workspace(candidate["workspace"])
                     if isinstance(exc, CodexFailure):
                         candidate["reason"] = exc.code
                     else:
@@ -952,7 +926,6 @@ class ResearchController:
                     candidates_per_seed=self.config.screening_size,
                     solver_seconds=self.config.solver_seconds,
                     verification_seconds=self.config.verification_seconds,
-                    workers=self.config.verification_workers,
                     verifier=self.verifier,
                     deadline=budget.deadline,
                     progress=self._stage_progress(f"candidate {candidate['id']} screen"),
@@ -962,6 +935,16 @@ class ResearchController:
                 candidate["status"] = "screen_rejected"
                 candidate["reason"] = str(exc).split(":", 1)[0]
                 continue
+            self._say(
+                f"candidate {candidate['id']} screen done: {summary['elapsed_seconds']:.1f}s "
+                f"(solver {summary.get('solver_elapsed_seconds', 0.0):.1f}s, "
+                f"Sage {summary.get('verification_elapsed_seconds', 0.0):.1f}s)"
+            )
+            self._say(
+                f"candidate {candidate['id']} benchmark done: {summary['elapsed_seconds']:.1f}s "
+                f"(solver {summary.get('solver_elapsed_seconds', 0.0):.1f}s, "
+                f"Sage {summary.get('verification_elapsed_seconds', 0.0):.1f}s)"
+            )
             budget.spend_sage(summary["sage_calls"])
             candidate["sage_calls"] = candidate.get("sage_calls", 0) + summary["sage_calls"]
             candidate["screen"] = summary
@@ -1004,7 +987,6 @@ class ResearchController:
                     candidates_per_seed=self.config.benchmark_size,
                     solver_seconds=self.config.solver_seconds,
                     verification_seconds=self.config.verification_seconds,
-                    workers=self.config.verification_workers,
                     verifier=self.verifier,
                     deadline=budget.deadline,
                     progress=self._stage_progress(f"candidate {candidate['id']} benchmark"),
@@ -1032,30 +1014,44 @@ class ResearchController:
         budget: Budget,
         public_seen: set[str],
         catalogue_pairs: set[tuple[str, int]],
-    ) -> tuple[list[dict], dict]:
+    ) -> list[dict]:
+        """Cheap shared-seed qualifier before the expensive final holdout.
+
+        The preliminary race is intentionally *not* an acceptance test.  It
+        only reduces up to three screen survivors to the two strongest solo
+        candidates.  Statistical confidence comes from the later 60-seed final
+        holdout, so there is no reason to spend 60 preliminary seeds too.
+        """
+
         incumbent_records: list[dict] = []
         incumbent_seen = set(public_seen)
         for candidate in candidates:
             candidate["prelim_records"] = []
             candidate["prelim_seen"] = set(public_seen) | set(candidate["eval_hashes"])
+
         active = list(candidates)
-        passed: list[dict] = []
         seed_cursor = 0
         incumbent_fresh: dict = {"_fresh_seed_pair_counts": {}}
 
         for round_index, seed_count in enumerate(self.config.fresh_round_seed_counts):
             if not active:
                 break
+
             first = seed_cursor + 1
             seed_cursor += seed_count
             seeds = tuple(
-                derived_seed(self.config.comparison_master_seed, f"generation-{generation}-prelim", index)
+                derived_seed(
+                    self.config.comparison_master_seed,
+                    f"generation-{generation}-prelim",
+                    index,
+                )
                 for index in range(first, seed_cursor + 1)
             )
             self._say(
-                f"generation {generation}: preliminary race round {round_index + 1}, "
+                f"generation {generation}: qualifier round {round_index + 1}, "
                 f"{seed_count} new shared seeds ({seed_cursor} total)"
             )
+
             inc_summary, inc_records, inc_hashes = evaluate_fresh(
                 self.solver_file,
                 seeds=seeds,
@@ -1065,18 +1061,21 @@ class ResearchController:
                 already_seen=incumbent_seen,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
-                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
-                progress=self._stage_progress(f"generation {generation} incumbent prelim r{round_index + 1}"),
+                progress=self._stage_progress(
+                    f"generation {generation} incumbent qualifier r{round_index + 1}"
+                ),
                 progress_every=self.config.progress_every,
             )
             budget.spend_sage(inc_summary["sage_calls"])
             incumbent_seen.update(inc_hashes)
             incumbent_records.extend(inc_records)
-            incumbent_fresh = summarize_fresh_records(incumbent_records, catalogue_pairs=catalogue_pairs)
+            incumbent_fresh = summarize_fresh_records(
+                incumbent_records, catalogue_pairs=catalogue_pairs
+            )
 
-            still_active: list[dict] = []
+            survivors: list[dict] = []
             for candidate in active:
                 try:
                     summary, records, hashes = evaluate_fresh(
@@ -1088,84 +1087,61 @@ class ResearchController:
                         already_seen=candidate["prelim_seen"],
                         solver_seconds=self.config.solver_seconds,
                         verification_seconds=self.config.verification_seconds,
-                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(
-                            f"candidate {candidate['id']} prelim r{round_index + 1}"
+                            f"candidate {candidate['id']} qualifier r{round_index + 1}"
                         ),
                         progress_every=self.config.progress_every,
                     )
                 except SolverError as exc:
                     candidate["status"] = "preliminary_rejected"
                     candidate["reason"] = str(exc).split(":", 1)[0]
-                    candidate["prelim_reason"] = candidate["reason"]
-                    candidate["prelim_seeds"] = seed_cursor
                     self._say(
-                        f"candidate {candidate['id']}: preliminary rejection "
+                        f"candidate {candidate['id']}: qualifier rejection "
                         f"({candidate['reason']})"
                     )
                     continue
+
                 budget.spend_sage(summary["sage_calls"])
-                candidate["sage_calls"] = candidate.get("sage_calls", 0) + summary["sage_calls"]
+                candidate["sage_calls"] += summary["sage_calls"]
                 candidate["prelim_seen"].update(hashes)
                 candidate["eval_hashes"].update(hashes)
                 candidate["prelim_records"].extend(records)
                 candidate["fresh"] = summarize_fresh_records(
                     candidate["prelim_records"], catalogue_pairs=catalogue_pairs
                 )
-                # A clear gain before the final preliminary round means the candidate
-                # has QUALIFIED for the finalist pool; it does not mean we stop gathering
-                # paired evidence for it.  Every eventual finalist must be evaluated on
-                # the same cumulative seed set as the incumbent, otherwise ranking
-                # finalists at the end would compare (for example) 30-seed evidence
-                # against the incumbent's 60-seed evidence.
-                if candidate.get("_prelim_qualified"):
-                    candidate["prelim_seeds"] = seed_cursor
-                    if round_index >= len(self.config.fresh_round_seed_counts) - 1:
-                        candidate["status"] = "preliminary_passed"
-                        passed.append(candidate)
-                        self._say(
-                            f"candidate {candidate['id']}: preliminary qualification confirmed "
-                            f"on {seed_cursor} shared seeds"
-                        )
-                    else:
-                        still_active.append(candidate)
-                    continue
-
-                action, reason = race_checkpoint_decision(
-                    self.store.state()["incumbent_benchmark"],
-                    candidate["benchmark"],
-                    incumbent_fresh,
-                    candidate["fresh"],
-                    round_index=round_index,
-                    total_rounds=len(self.config.fresh_round_seed_counts),
-                )
-                candidate["prelim_reason"] = reason
                 candidate["prelim_seeds"] = seed_cursor
-                if action == "accept":
-                    candidate["_prelim_qualified"] = True
-                    if round_index >= len(self.config.fresh_round_seed_counts) - 1:
-                        candidate["status"] = "preliminary_passed"
-                        passed.append(candidate)
-                        self._say(f"candidate {candidate['id']}: passed preliminary race ({reason})")
-                    else:
-                        candidate["status"] = "preliminary_qualified"
-                        still_active.append(candidate)
-                        self._say(
-                            f"candidate {candidate['id']}: qualified early ({reason}); "
-                            "continuing on later shared seeds for fair finalist ranking"
-                        )
-                elif action == "reject":
-                    candidate["status"] = "preliminary_rejected"
-                    candidate["reason"] = reason
-                    self._say(f"candidate {candidate['id']}: preliminary rejection ({reason})")
-                else:
-                    still_active.append(candidate)
-            active = still_active
+                survivors.append(candidate)
 
-        passed.sort(key=lambda candidate: _candidate_rank(candidate, incumbent_fresh), reverse=True)
-        return passed[:self.config.max_synthesis_finalists], incumbent_fresh
+            survivors.sort(
+                key=lambda candidate: _candidate_rank(candidate, incumbent_fresh),
+                reverse=True,
+            )
+
+            # After the first cheap round, carry only the two strongest solos.
+            if round_index < len(self.config.fresh_round_seed_counts) - 1:
+                keep = survivors[: self.config.max_synthesis_finalists]
+                for candidate in survivors[self.config.max_synthesis_finalists :]:
+                    candidate["status"] = "preliminary_pruned"
+                    candidate["reason"] = "qualifier_pruned_after_round1"
+                active = keep
+                if active:
+                    self._say(
+                        "qualifier survivors=" + ",".join(candidate["id"] for candidate in active)
+                    )
+            else:
+                active = survivors[: self.config.max_synthesis_finalists]
+
+        for candidate in active:
+            candidate["status"] = "preliminary_passed"
+            candidate["reason"] = "qualifier_passed"
+
+        active.sort(
+            key=lambda candidate: _candidate_rank(candidate, incumbent_fresh),
+            reverse=True,
+        )
+        return active
 
     def _synthesize(
         self,
@@ -1222,7 +1198,12 @@ class ResearchController:
 
         best = finalists[0]
         workspace = generation_dir / "candidate-S"
-
+        synthesis_solver = workspace / "solver.py"
+        synthesis_start_source = (
+            synthesis_solver.read_text(encoding="utf-8")
+            if synthesis_solver.exists()
+            else best["source"]
+        )
         references = {
             "synthesis_plan": response.data,
             "finalists": [
@@ -1232,7 +1213,7 @@ class ResearchController:
         }
         _initialize_workspace(
             workspace,
-            best["source"],
+            synthesis_start_source,
             "Edit solver.py only. Use this synthesis plan and references:\n\n"
             + json.dumps(references, indent=2, sort_keys=True),
         )
@@ -1247,6 +1228,8 @@ class ResearchController:
                 "Primary objective is missing-pair discovery; discriminant reduction is secondary.",
                 "Keep coefficient generation fast: 2,000 candidates must complete comfortably within the solver timeout.",
                 "Use bounded deterministic generation; avoid unbounded rejection loops or expensive algebraic verification inside solver.py.",
+                "Keep the persistent synthesis lineage coherent; replace obsolete mechanisms instead of accumulating them forever.",
+                "Write readable conventional Python; no code golf, semicolon-chained statements, or unexplained magic constants/algorithms.",
             ],
         }, sort_keys=True)
         budget.reserve_ai(1)
@@ -1261,10 +1244,12 @@ class ResearchController:
         budget.add_usage(implement.usage)
         changed = _changed_paths(workspace)
         if changed != ["solver.py"]:
+            _restore_candidate_workspace(workspace)
             self._say(f"synthesized candidate rejected: changed paths {changed}")
             return None
-        source = (workspace / "solver.py").read_text(encoding="utf-8")
-        if source == best["source"]:
+        source = synthesis_solver.read_text(encoding="utf-8")
+        if source == synthesis_start_source:
+            _restore_candidate_workspace(workspace)
             self._say("synthesized candidate rejected: no code change")
             return None
         candidate = {
@@ -1294,7 +1279,6 @@ class ResearchController:
                 candidates_per_seed=self.config.screening_size,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
-                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress("synthesized screen"),
@@ -1316,7 +1300,6 @@ class ResearchController:
                 candidates_per_seed=self.config.benchmark_size,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
-                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress("synthesized benchmark"),
@@ -1327,57 +1310,14 @@ class ResearchController:
             candidate["benchmark"] = benchmark
             candidate["eval_hashes"].update(hashes)
             candidate["status"] = "synthesis_passed"
+            _commit_candidate_workspace(workspace, f"synthesis generation {generation}")
             return candidate
         except (SolverError, EvaluationDeadlineExceeded, ValueError) as exc:
+            _restore_candidate_workspace(workspace)
             candidate["status"] = "synthesis_rejected"
             candidate["reason"] = str(exc).split(":", 1)[0]
             return candidate
 
-    def _discriminant_probe(self, records: list[dict], budget: Budget) -> dict:
-        limit = self.config.discriminant_checks_per_finalist
-        if limit <= 0:
-            return {"checked": 0, "improvements": 0, "best_ratio": 1.0}
-        catalogue = self.store.catalogue()
-        by_pair: dict[str, dict] = {}
-        for record in records:
-            if record.get("status") != "verified":
-                continue
-            key = self.store.pair_key(record["galois_group"], int(record["real_roots"]))
-            entry = catalogue.get(key)
-            if not entry or entry.get("field_discriminant") is None:
-                continue
-            if int(record["polynomial_discriminant"]) >= int(entry["polynomial_discriminant"]):
-                continue
-            previous = by_pair.get(key)
-            if previous is None or int(record["polynomial_discriminant"]) < int(previous["polynomial_discriminant"]):
-                by_pair[key] = record
-        ranked = sorted(
-            by_pair.items(),
-            key=lambda item: int(item[1]["polynomial_discriminant"]) / max(1, int(catalogue[item[0]]["field_discriminant"])),
-        )[:limit]
-        improvements = 0
-        best_ratio = 1.0
-        checked = 0
-        for key, record in ranked:
-            if budget.seconds_left <= 0:
-                break
-            old = int(catalogue[key]["field_discriminant"])
-            try:
-                value = record.get("field_discriminant")
-                if value is None:
-                    value = self.field_discriminant_fn(
-                        record["coefficients"],
-                        timeout_seconds=min(self.config.verification_seconds, budget.seconds_left),
-                    )
-                value = abs(int(value))
-                budget.spend_sage(1)
-                checked += 1
-            except Exception:
-                continue
-            if value < old:
-                improvements += 1
-                best_ratio = min(best_ratio, value / old)
-        return {"checked": checked, "improvements": improvements, "best_ratio": best_ratio}
 
     def _final_race(
         self,
@@ -1387,9 +1327,9 @@ class ResearchController:
         budget: Budget,
         public_seen: set[str],
         catalogue_pairs: set[tuple[str, int]],
-    ) -> tuple[dict | None, dict, list[dict]]:
+    ) -> tuple[dict | None, dict]:
         if not challengers:
-            return None, {"fresh_new_pairs": 0, "_fresh_seed_pair_counts": {}}, []
+            return None, {"fresh_new_pairs": 0, "_fresh_seed_pair_counts": {}}
 
         incumbent_records: list[dict] = []
         incumbent_seen = set(public_seen)
@@ -1422,7 +1362,6 @@ class ResearchController:
                 already_seen=incumbent_seen,
                 solver_seconds=self.config.solver_seconds,
                 verification_seconds=self.config.verification_seconds,
-                workers=self.config.verification_workers,
                 verifier=self.verifier,
                 deadline=budget.deadline,
                 progress=self._stage_progress(f"generation {generation} incumbent final r{round_index + 1}"),
@@ -1445,7 +1384,6 @@ class ResearchController:
                         already_seen=candidate["final_seen"],
                         solver_seconds=self.config.solver_seconds,
                         verification_seconds=self.config.verification_seconds,
-                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(f"candidate {candidate['id']} final r{round_index + 1}"),
@@ -1478,22 +1416,15 @@ class ResearchController:
                 active = active[:self.config.final_max_challengers_after_round1]
                 self._say("final holdout: round-1 survivors=" + ",".join(c["id"] for c in active))
 
-        incumbent_disc = self._discriminant_probe(incumbent_records, budget)
-        for candidate in active:
-            candidate["discriminants"] = self._discriminant_probe(candidate["final_records"], budget)
-            candidate["sage_calls"] = candidate.get("sage_calls", 0) + candidate["discriminants"].get("checked", 0)
-
         active.sort(key=lambda c: _candidate_rank(c, incumbent_fresh), reverse=True)
         if not active:
-            return None, incumbent_fresh, challengers
+            return None, incumbent_fresh
         best = active[0]
         accepted, reason = acceptance_decision(
             self.store.state()["incumbent_benchmark"],
             best["benchmark"],
             incumbent_fresh,
             best["fresh"],
-            incumbent_disc,
-            best.get("discriminants"),
         )
         best["final_reason"] = reason
         for candidate in active:
@@ -1504,8 +1435,8 @@ class ResearchController:
                 candidate["status"] = "final_rejected"
                 candidate["reason"] = reason if candidate is best else "final_lower_rank"
         if not accepted:
-            return None, incumbent_fresh, challengers
-        return best, incumbent_fresh, challengers
+            return None, incumbent_fresh
+        return best, incumbent_fresh
 
     def _record_candidate(self, candidate: dict, *, generation: int, session_id: str, accepted: bool, solver_commit: str = "") -> None:
         screen = candidate.get("screen") or {}
@@ -1573,7 +1504,7 @@ class ResearchController:
             }
             for row in rows
         ]
-        workspace = self.candidate_root / f"generation-{generation:04d}" / "critic"
+        workspace = self.candidate_root / "critic"
         _initialize_readonly_workspace(workspace, "generation critic")
         prompt = json.dumps({
             "role": "Sol generation critic",
@@ -1610,8 +1541,9 @@ class ResearchController:
                 "ai_budget_insufficient_for_generation",
                 f"needed_at_least={self.config.minimum_generation_ai_calls}:left={budget.ai_left}",
             )
-        generation_dir = self.candidate_root / f"generation-{generation:04d}"
-        self._cleanup_candidate_workspace()
+        # A-E and S are persistent lineages. Generations update these same
+        # workspaces instead of creating/deleting generation directories.
+        generation_dir = self.candidate_root
         generation_dir.mkdir(parents=True, exist_ok=True)
         catalogue_pairs = {
             (entry["galois_group"], int(entry["real_roots"])) for entry in self.store.catalogue().values()
@@ -1619,12 +1551,13 @@ class ResearchController:
         self._say(
             f"generation {generation}: one Sol researcher -> five parallel Terra implementations"
         )
+        generation_started = time.monotonic()
         generation_usage_before = budget.usage
         generation_ai_before = budget.ai
         generation_sage_before = budget.sage
         winner_id = "incumbent"
         try:
-            research, research_usage = self._ask_researcher(state, budget, generation_dir)
+            research = self._ask_researcher(state, budget, generation_dir)
             self.store.append_history(
                 "generation_research",
                 {
@@ -1636,18 +1569,20 @@ class ResearchController:
             )
             candidates = self._parallel_implement(research["hypotheses"], budget, generation_dir)
             survivors = self._screen_candidates(candidates, budget, catalogue_pairs)
+
+            # Missing-pair evidence is the primary objective, so run the cheap
+            # shared-seed qualifier BEFORE paying the 2,000-slot benchmark.
             if survivors:
-                survivors = self._benchmark_candidates(survivors, budget)
-            if survivors:
-                finalists, incumbent_prelim = self._preliminary_race(
+                finalists = self._preliminary_race(
                     survivors,
                     generation=generation,
                     budget=budget,
                     public_seen=public_seen,
                     catalogue_pairs=catalogue_pairs,
                 )
+                finalists = self._benchmark_candidates(finalists, budget)
             else:
-                finalists, incumbent_prelim = [], {"_fresh_seed_pair_counts": {}}
+                finalists = []
 
             synthesis = self._synthesize(
                 finalists,
@@ -1656,11 +1591,14 @@ class ResearchController:
                 generation_dir=generation_dir,
                 catalogue_pairs=catalogue_pairs,
             )
-            challengers = list(finalists)
+
+            # The expensive final holdout compares only the best solo proposal
+            # and (if available) the synthesis against the incumbent.
+            challengers = finalists[:1]
             if synthesis is not None and synthesis.get("status") == "synthesis_passed":
                 challengers.append(synthesis)
 
-            winner, incumbent_final, final_candidates = self._final_race(
+            winner, incumbent_final = self._final_race(
                 challengers,
                 generation=generation,
                 budget=budget,
@@ -1725,8 +1663,14 @@ class ResearchController:
             )
             self.store.rebuild_report()
             self._critic(state, budget, session_id, generation, winner_id)
+            self._say(
+                f"generation {generation}: completed in {time.monotonic() - generation_started:.1f}s; "
+                f"Sage calls={budget.sage - generation_sage_before}, "
+                f"AI calls={budget.ai - generation_ai_before}"
+            )
         finally:
-            self._cleanup_candidate_workspace()
+            # Candidate lineages intentionally persist across generations.
+            pass
 
     def _complete_new_pair_discriminants(
         self,
@@ -1848,13 +1792,14 @@ class ResearchController:
             except BlockingIOError as exc:
                 raise ResearchStop("research_already_running") from exc
 
-            self._cleanup_candidate_workspace()
             state = self.store.state()
             self._check_state_consistency(state)
             _safe_working_tree(self.root)
-            self.run_tests(self.root)
+            # `mini-igp8 check` owns the full unit suite. Research startup only
+            # performs the cheap runtime invariants needed for this session.
             self._validate_solver(self.solver_file)
             ensure_sage_available()
+            configure_verification_workers(self.config.verification_workers)
             self._ensure_run_identity(state)
 
             session_id = uuid.uuid4().hex[:12]
@@ -1896,9 +1841,8 @@ class ResearchController:
                         budget=request,
                         oversample_factor=self.config.search_oversample,
                         already_seen=seen,
-                        solver_seconds=self.config.solver_seconds,
+                        solver_seconds=self.config.search_solver_seconds,
                         verification_seconds=self.config.verification_seconds,
-                        workers=self.config.verification_workers,
                         verifier=self.verifier,
                         deadline=budget.deadline,
                         progress=self._stage_progress(f"search batch {batch}"),
@@ -1935,7 +1879,9 @@ class ResearchController:
                     self._say(
                         f"search batch {batch}: checked={summary['submitted']}, "
                         f"new_pairs={len(change.new_pairs)}, disc_improvements={disc_improvements}, "
-                        f"catalogue={len(self.store.catalogue())}/157, elapsed={summary['elapsed_seconds']:.1f}s"
+                        f"catalogue={len(self.store.catalogue())}/157, total={summary['elapsed_seconds']:.1f}s "
+                        f"(solver={summary.get('solver_elapsed_seconds', 0.0):.1f}s, "
+                        f"Sage={summary.get('verification_elapsed_seconds', 0.0):.1f}s)"
                     )
                     if summary["deadline_reached"]:
                         stop_code = "wall_time_limit_reached"
@@ -1962,7 +1908,6 @@ class ResearchController:
                     "research_infrastructure_failure", {"detail": detail}, session_id=session_id
                 )
             finally:
-                self._cleanup_candidate_workspace()
                 state["last_stop_code"] = stop_code
                 self.store.save_state(state)
                 self.store.rebuild_report()
@@ -1984,6 +1929,8 @@ class ResearchController:
                     )
                 except GitError as exc:
                     raise ResearchStop("git_checkpoint_failed", str(exc)) from exc
+                finally:
+                    shutdown_verification_workers()
             return {
                 "session_id": session_id,
                 "stop_code": stop_code,

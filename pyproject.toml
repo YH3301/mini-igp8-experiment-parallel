@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mini-igp8-experiment"
-version = "5.0.0"
-description = "A parallel generation-based autonomous degree-8 inverse-Galois research loop"
+version = "6.0.0"
+description = "A optimized parallel autonomous degree-8 inverse-Galois research loop"
 readme = "README.md"
 requires-python = ">=3.11"
 

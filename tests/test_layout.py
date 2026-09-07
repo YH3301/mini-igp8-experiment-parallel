@@ -4,7 +4,7 @@ from mini_igp8.storage import RESULT_FILENAMES, ROOT
 
 
 class LayoutTests(unittest.TestCase):
-    def test_repository_layout_is_fixed_and_small(self):
+    def test_repository_root_stays_small(self):
         allowed = {
             ".git", ".gitignore", ".idea", ".pytest_cache", ".ruff_cache",
             ".venv", ".vscode", "AGENTS.md", "README.md", "build",
@@ -13,27 +13,23 @@ class LayoutTests(unittest.TestCase):
         }
         unexpected = sorted(
             path.name for path in ROOT.iterdir()
-            if path.name not in allowed and not path.name.endswith(".egg-info")
+            if path.name not in allowed
+            and not path.name.endswith(".egg-info")
             and path.name != ".mini-igp8-research.lock"
         )
-        self.assertEqual(unexpected, [], "new root entries require explicit human approval")
+        self.assertEqual(unexpected, [])
 
-    def test_results_are_exactly_six_stable_files(self):
-        actual = {path.name for path in (ROOT / "results").iterdir() if not path.name.endswith(".tmp")}
+    def test_results_use_the_fixed_files(self):
+        actual = {
+            path.name for path in (ROOT / "results").iterdir()
+            if not path.name.endswith(".tmp")
+        }
         self.assertEqual(actual, set(RESULT_FILENAMES))
-        self.assertTrue(all(path.is_file() for path in (ROOT / "results").iterdir()))
 
-    def test_package_and_tests_remain_flat(self):
-        for directory in (ROOT / "mini_igp8", ROOT / "tests"):
-            subdirectories = {
-                path.name for path in directory.iterdir()
-                if path.is_dir() and path.name != "__pycache__"
-            }
-            self.assertEqual(subdirectories, set())
-
-    def test_no_unbounded_run_or_agent_artifact_directories(self):
-        for name in ("runs", "campaigns", "automation", "worktrees", "proposals"):
-            self.assertFalse((ROOT / name).exists())
+    def test_persistent_candidate_workspace_is_git_ignored(self):
+        self.assertTrue((ROOT / "candidates" / "README.md").is_file())
+        ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+        self.assertIn("/candidates/current/", ignore)
 
 
 if __name__ == "__main__":

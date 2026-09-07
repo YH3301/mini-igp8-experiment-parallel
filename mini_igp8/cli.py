@@ -44,9 +44,10 @@ def check(_args: argparse.Namespace) -> int:
         checks.append((
             "configuration",
             True,
-            f"AI after {config.stagnation} stagnant search candidates; "
+            f"{config.batch_size} search candidates/batch; AI after {config.stagnation} stagnant; "
             f"1 Sol -> {config.candidate_count} parallel Terra candidates; "
-            f"Sage calls uncapped; {config.max_ai} AI calls/session",
+            f"{config.verification_workers} Sage workers; Sage calls uncapped; "
+            f"{config.max_ai} AI calls/session",
         ))
     except Exception as exc:
         config = None
@@ -71,9 +72,7 @@ def check(_args: argparse.Namespace) -> int:
                 set(config.benchmark_seeds) | set(config.screening_seeds)
                 if config else set()
             ),
-            stress_budget=(
-                config.batch_size * config.search_oversample if config else 1000
-            ),
+            stress_budget=2000,
         )
         checks.append(("solver", True, "deterministic, isolated, unique, and fast enough"))
     except Exception as exc:
@@ -117,7 +116,7 @@ def check(_args: argparse.Namespace) -> int:
 
 
 def status(args: argparse.Namespace) -> int:
-    snapshot = ResearchController(run_tests=lambda _root: None).snapshot()
+    snapshot = ResearchController().snapshot()
     if args.json:
         print(json.dumps(snapshot, indent=2, sort_keys=True))
     else:

@@ -1,15 +1,19 @@
-version = 5
+version = 6
 
 [search]
 master_seed = 20260905
+# One public search checkpoint is exactly 10,000 requested candidates.
 batch_size = 10000
-oversample_factor = 2
+# Candidate generators are already required to be unique within a call. Do not
+# blindly generate 2x/4x more work; duplicates across old batches are simply
+# skipped and count as a genuine weakness of the solver.
+oversample_factor = 1
 ask_ai_after_stagnation = 50000
 recent_hash_limit = 1000000
 
 [generation]
-# One Sol call proposes five deliberately different hypotheses. Five Terra
-# implementers then work concurrently in isolated in-repo workspaces.
+# One Sol researcher proposes five distinct hypotheses. Five Terra workers edit
+# persistent candidate lineages concurrently.
 candidate_count = 5
 parallel_implementers = 5
 max_screen_survivors = 3
@@ -20,47 +24,44 @@ seeds = [98473854, 73978472, 95331953, 78066815, 85550877]
 candidates_per_seed = 100
 
 [benchmark]
+# Frozen benchmark is now run only for preliminary finalists, not every screen survivor.
 seeds = [65596346, 98271061, 79645325, 55812117, 60033886, 39598420, 40852374, 25099107, 18470197, 71360943, 28905360, 94448930, 15139202, 77519619, 26587086, 10988479, 67665287, 38707421, 40825801, 67860200]
 candidates_per_seed = 100
 
 [comparison]
-# Preliminary race shared by the incumbent and every surviving candidate.
+# Cheap qualifier only: 5 + 10 = 15 shared seeds. The expensive confidence
+# test is the final holdout below.
 master_seed = 20260906
-round_seed_counts = [5, 10, 15]
+round_seed_counts = [5, 10]
 candidates_per_seed = 100
-oversample_factor = 2
+oversample_factor = 1
 
 [final_comparison]
-# A separate fresh holdout race is used after synthesis. First 20 paired seeds,
-# then another 40 only for the strongest two challengers.
+# Strong acceptance test: 20 shared seeds, then another 40 for only the single
+# strongest challenger versus the incumbent (60 total seeds).
 master_seed = 20260907
 round_seed_counts = [20, 40]
 candidates_per_seed = 100
-oversample_factor = 2
-max_challengers_after_round1 = 2
-
-[parallel]
-# This is the global number of simultaneous Sage verifications. It is shared
-# by every A-E or S evaluation; it is not one pool per tournament candidate.
-verification_workers = 5
+oversample_factor = 1
+max_challengers_after_round1 = 1
 
 [discriminants]
 continue_after_full_coverage = true
-# Secondary objective only. New target-pair discovery always outranks this.
-# During normal search, inspect at most this many already-solved pairs per batch.
-max_checks_per_search_batch = 8
-# During final solver selection, probe at most this many known-pair candidates
-# per solver as a tie-break after missing-pair evidence.
-max_checks_per_finalist = 6
+# Secondary objective. Only public search candidates are probed, never the
+# large hidden tournament samples.
+max_checks_per_search_batch = 4
 
 [limits]
 # Sage calls are telemetry only and never stop a session.
 max_ai_calls_per_session = 45
 max_wall_minutes_per_session = 360
 ai_call_seconds = 300
-solver_call_seconds = 100
-verification_seconds = 100
-progress_every_candidates = 100
+solver_call_seconds = 30
+search_solver_call_seconds = 120
+verification_seconds = 30
+verification_workers = 4
+# 10 progress lines for a 10k public batch instead of 100.
+progress_every_candidates = 5000
 
 [models]
 researcher = "gpt-5.6-sol"

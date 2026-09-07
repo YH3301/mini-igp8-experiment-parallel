@@ -1,8 +1,8 @@
 """Exact SageMath verification for degree-8 candidates.
 
-The hot path deliberately computes only facts needed for search/evaluation.
-The more expensive number-field discriminant is computed lazily only when a
-polynomial is actually added to the public catalogue.
+Search verification computes only facts needed by the public catalogue. Hidden
+screen/benchmark/race evaluations can skip the polynomial discriminant to stay
+on the fast path.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ class VerificationTimeoutError(TimeoutError):
 
 
 def validate_coefficients(candidate: object) -> list[int]:
-    """Validate format only; coefficient magnitude is intentionally unrestricted."""
+    """Validate the solver output format; coefficient magnitude is unrestricted."""
 
     if not isinstance(candidate, (list, tuple)):
         raise ValueError("candidate_not_list_or_tuple")
@@ -68,8 +68,6 @@ def ensure_sage_available() -> None:
 
 @contextmanager
 def _time_limit(seconds: int | float | None):
-    """Bound one verifier call on Linux/WSL when SIGALRM is available."""
-
     if not seconds or not hasattr(signal, "setitimer"):
         yield
         return
@@ -87,12 +85,18 @@ def _time_limit(seconds: int | float | None):
         signal.signal(signal.SIGALRM, previous)
 
 
-def verify(candidate: object, *, timeout_seconds: int | float | None = None) -> dict:
-    """Return exact search facts or one precise failure status.
+def verify(
+    candidate: object,
+    *,
+    timeout_seconds: int | float | None = None,
+    include_polynomial_discriminant: bool = True,
+) -> dict:
+    """Verify one candidate exactly.
 
-    This intentionally does *not* construct a number field for every successful
-    candidate.  ``field_discriminant`` is filled only for catalogue discoveries
-    via :func:`field_discriminant`.
+    ``include_polynomial_discriminant=False`` is used for hidden tournament
+    samples, where the discriminant is irrelevant to the primary selection
+    signal. Public search keeps it enabled for the secondary discriminant
+    objective.
     """
 
     try:
@@ -102,7 +106,10 @@ def verify(candidate: object, *, timeout_seconds: int | float | None = None) -> 
 
     try:
         with _time_limit(timeout_seconds):
-            return _verify_valid(coefficients)
+            return _verify_valid(
+                coefficients,
+                include_polynomial_discriminant=include_polynomial_discriminant,
+            )
     except VerificationTimeoutError:
         return {
             "status": "verification_timeout",
@@ -111,10 +118,14 @@ def verify(candidate: object, *, timeout_seconds: int | float | None = None) -> 
         }
 
 
-def _verify_valid(coefficients: list[int]) -> dict:
+def _verify_valid(
+    coefficients: list[int],
+    *,
+    include_polynomial_discriminant: bool,
+) -> dict:
     _NumberField, ring = _sage_context()
     polynomial = ring(coefficients)
-    common = {"coefficients": coefficients, "polynomial": str(polynomial)}
+    common = {"coefficients": coefficients}
 
     try:
         if not bool(polynomial.is_irreducible()):
@@ -142,7 +153,6 @@ def _verify_valid(coefficients: list[int]) -> dict:
     try:
         group = polynomial.galois_group(pari_group=True, algorithm="pari")
         transitive_number = int(group.transitive_number())
-        group_order = int(group.order())
     except VerificationTimeoutError:
         raise
     except Exception as exc:
@@ -153,30 +163,26 @@ def _verify_valid(coefficients: list[int]) -> dict:
             **common,
         }
 
-    try:
-        polynomial_discriminant = abs(int(polynomial.discriminant()))
-    except VerificationTimeoutError:
-        raise
-    except Exception as exc:
-        return {
-            "status": "polynomial_discriminant_error",
-            "reason_code": type(exc).__name__,
-            "galois_group": f"8T{transitive_number}",
-            "real_roots": real_roots,
-            **common,
-        }
-
-    return {
+    result = {
         "status": "verified",
         **common,
-        "degree": DEGREE,
         "galois_group": f"8T{transitive_number}",
-        "transitive_number": transitive_number,
-        "group_order": group_order,
         "real_roots": real_roots,
-        "complex_pairs": (DEGREE - real_roots) // 2,
-        "polynomial_discriminant": polynomial_discriminant,
     }
+
+    if include_polynomial_discriminant:
+        try:
+            result["polynomial_discriminant"] = abs(int(polynomial.discriminant()))
+        except VerificationTimeoutError:
+            raise
+        except Exception as exc:
+            return {
+                "status": "polynomial_discriminant_error",
+                "reason_code": type(exc).__name__,
+                **result,
+            }
+
+    return result
 
 
 def field_discriminant(
@@ -188,9 +194,6 @@ def field_discriminant(
 
     coefficients = validate_coefficients(candidate)
     NumberField, ring = _sage_context()
-    try:
-        with _time_limit(timeout_seconds):
-            polynomial = ring(coefficients)
-            return abs(int(NumberField(polynomial, "a").discriminant()))
-    except VerificationTimeoutError:
-        raise
+    with _time_limit(timeout_seconds):
+        polynomial = ring(coefficients)
+        return abs(int(NumberField(polynomial, "a").discriminant()))

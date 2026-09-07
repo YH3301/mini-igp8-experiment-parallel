@@ -2,41 +2,30 @@
 
 This repository is an autonomous mathematical experiment, not a general coding workspace.
 
-## Immutable experiment principles
+## Experiment invariants
 
-1. A new run begins with empty results and `mini_igp8/solver.py` identical to
-   `mini_igp8/baseline_solver.py`.
-2. Normal search discoveries are cumulative and remain valid after later solver changes.
-3. Missing target-pair discovery is the primary objective. Smaller absolute number-field
-   discriminants for already-solved pairs are secondary.
-4. Hidden screening, benchmark, and race evidence must never be inserted into the public
-   catalogue or exposed as hidden seed/pair identities to future agents.
-5. Only an accepted final-generation winner may replace `mini_igp8/solver.py`.
-6. Accepted solver revisions are preserved by Git. Do not create permanent solver-version files.
-7. `results/experiments.csv` and `results/history.jsonl` are append-only during a run. Never
-   truncate old solver experiments after an acceptance.
-8. `results/seen_hashes.txt` is only a bounded duplicate-prevention cache and may roll over.
+1. A new run starts with empty results and `mini_igp8/solver.py == mini_igp8/baseline_solver.py`.
+2. Public discoveries are cumulative. Later solver changes never invalidate earlier Sage-verified pairs.
+3. Missing target-pair discovery is the primary objective. Smaller absolute number-field discriminants for solved pairs are secondary.
+4. Hidden screen/benchmark/race evidence never enters the public catalogue and hidden seed identities are never exposed to agents.
+5. Only a final accepted winner may replace `mini_igp8/solver.py`.
+6. `results/experiments.csv` and `results/history.jsonl` are append-only during a run.
+7. `results/seen_hashes.txt` is only a bounded duplicate cache.
 
-## Candidate workspaces
+## Persistent candidate lineages
 
-The controller owns `candidates/current/`. Five Terra candidates may exist there concurrently.
-A candidate agent may edit **only its own `solver.py`**. It must not create files, commit, inspect
-siblings, or read parent-repository results. The controller validates each nested workspace and
-rejects candidates that change other paths.
+The controller owns these Git-ignored workspaces:
 
-The candidate tree is Git-ignored and must be deleted after each completed generation. Stale
-work from a crash is removed at the start of the next research session.
+`candidates/current/candidate-A` through `candidate-E`, plus `candidate-S` for synthesis.
 
-## Solver contract
+They persist across normal generations. Terra edits only its own `solver.py`; the controller checkpoints successful edits in each nested candidate Git repository and rolls back invalid implementations. Only `mini-igp8 new-run --yes` deletes the candidate lineages.
 
-`generate_candidates(seed: int, budget: int)` must return exactly `budget` unique deterministic
-coefficient vectors `[a0,...,a8]` with integer entries, `a8 == 1`, and `a0 != 0`. There is no
-coefficient magnitude bound and no reciprocal/palindromic requirement.
+Do not create generation folders, solver-version files, notes, logs, worktrees, or other artifacts.
 
-Never hard-code catalogue polynomials, target answers, or held-out seed values.
+## Solver contract and code quality
 
-### Human-readable solver code
+`generate_candidates(seed: int, budget: int)` returns exactly `budget` unique deterministic integer vectors `[a0,...,a8]`, with `a8 == 1` and `a0 != 0`. There is no coefficient magnitude or symmetry restriction.
 
-`solver.py` must remain understandable to a human researcher. Optimization does not justify code golf. Use conventional Python formatting, descriptive names, appropriate helper functions, and useful comments/docstrings for mathematical constructions.
+Never hard-code catalogue polynomials, target answers, or held-out seeds. Keep generation fast and bounded. Do not perform Galois-group or number-field computations inside `solver.py`.
 
-Do not use semicolon-separated statements, multiple statements on one line, unnecessarily compressed comprehensions/lambdas, or deliberately minified code. Keep mathematical and performance-sensitive code readable. Prefer simple code over clever code when performance is comparable.
+Write readable conventional Python. Use descriptive names, normal spacing, small helpers, and brief comments/docstrings for non-obvious mathematical constructions, hashing/mixing routines, or numerical tricks. Do not use code golf, semicolon-chained statements, or compressed multi-statement lines.

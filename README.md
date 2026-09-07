@@ -1,90 +1,97 @@
-# Mini-IGP8 Parallel Research Experiment
+# Mini-IGP8 Optimized Parallel Experiment (v6)
 
-A clean-slate autonomous experiment for finding explicit degree-8 integer polynomials for all
-157 target `(8Tn, r)` inverse-Galois pairs, while secondarily improving the smallest known
-absolute number-field discriminants for already-solved pairs.
+Autonomous search for explicit degree-8 integer polynomials covering all 157 target `(8Tn, r)` pairs. Finding missing pairs is the primary objective; improving the smallest known absolute number-field discriminant for solved pairs is a secondary public-search objective.
 
-## Core idea
+## Runtime design
 
-The repository starts with an intentionally poor random solver. Normal search runs until 5,000
-search candidates pass without a new target pair or accepted solver. A research **generation**
-then runs:
+Normal search runs in **10,000-candidate batches**. After **50,000 public search candidates** without a new pair or accepted solver, one research generation begins:
 
-1. **One Sol lead researcher** proposes exactly five deliberately different hypotheses.
-2. **Five Terra implementers run concurrently**, each editing its own isolated solver under
-   `candidates/current/`.
-3. Every candidate gets a 500-slot hidden viability screen.
-4. At most the best three survivors receive the 2,000-slot frozen benchmark and an adaptive
-   10 -> 30 -> 60 shared-seed preliminary race against the incumbent.
-5. If at least two candidates pass, **Sol synthesizes** their complementary mechanisms and a
-   **Terra synthesis implementer** creates one coherent combined solver.
-6. Solo finalists and the synthesis candidate enter a separate fresh holdout race: 20 shared
-   seeds, then another 40 for the strongest two challengers.
-7. Only the final winner may replace `mini_igp8/solver.py`; it is committed to Git.
-8. **Sol critic runs after every completed generation**, accepted or rejected, and its feedback
-   is fed to the next generation.
+1. one Sol researcher proposes five genuinely different hypotheses;
+2. five Terra implementers update persistent candidate lineages A-E concurrently;
+3. all five receive a 500-slot viability screen; at most three survive;
+4. survivors enter a cheap **5 + 10 seed** shared-seed qualifier; only the best two continue;
+5. only those two pay the 2,000-slot frozen benchmark;
+6. Sol may synthesize the two finalists and Terra updates persistent candidate S;
+7. the expensive final holdout tests only **best solo vs synthesis vs incumbent** for 20 seeds, then only the single strongest challenger vs incumbent for another 40 seeds;
+8. only the final winner may replace `mini_igp8/solver.py`;
+9. Sol critic records generation-level lessons for the next researcher.
 
-A failed generation does **not** force another 5,000-candidate wait. The controller immediately
-starts another generation while the session has enough AI budget. An accepted solver gets a new
-5,000-candidate search window.
+This keeps the strong **60-seed final acceptance test** while removing most redundant preliminary Sage work.
 
-## Objectives
+## Main performance changes from v5.x
 
-Selection is lexicographic:
+- Search oversampling is `1`, so a 10,000-candidate batch no longer blindly generates 20,000-40,000 raw candidates.
+- Public 10k solver generation has its own 120-second timeout; candidate quality is still judged against the stricter 2,000-candidate / 30-second contract.
+- Frozen benchmarks are delayed until after the cheap qualifier.
+- Preliminary comparison shrank from 60 seeds to 15; the final acceptance race remains 60 seeds.
+- The final race carries only one challenger into its last 40 seeds.
+- Hidden screen/benchmark/race verification skips polynomial-discriminant computation.
+- Exact Sage verification uses a persistent **4-process worker pool** by default. Change `verification_workers` in `config.toml` if RAM/CPU suggests a different value.
+- `mini-igp8 research` no longer reruns the full unit suite on every invocation. `mini-igp8 check` remains the explicit validation command.
+- Solver contract validation always stress-tests 2,000 candidates instead of scaling with the 10k search batch.
+- Timing logs now separate solver-generation time from Sage-verification time.
 
-1. distinct currently-missing target pairs found;
-2. consistency across independent fresh seeds;
-3. total missing-pair hits / paired-seed wins;
-4. exact field-discriminant improvements for already-solved pairs;
-5. frozen benchmark quality.
+A worst-case generation is roughly **28k hidden Sage candidate verifications** before early failures/pruning, instead of roughly 50k-60k in the previous tournament design.
 
-Thus one genuinely new `(8Tn,r)` remains more valuable than many easy discriminant reductions.
-After 157/157 is reached, the default configuration keeps running so the experiment can continue
-to improve field discriminants.
+## Candidate persistence
 
-### Discriminant work during normal search
-
-The hot verifier does not compute a number-field discriminant for every polynomial. New pairs
-always get an exact field discriminant. For already-solved pairs, each 1,000-candidate search
-batch considers only candidates whose **polynomial** discriminant improves the current
-representative, keeps at most one candidate per pair, and performs at most 8 exact field-
-discriminant checks. A genuine improvement replaces only the best representative.
-
-The catalogue preserves both:
-
-- `first_solver_commit`: solver that first solved the pair;
-- `best_solver_commit`: solver that found the current smallest field-discriminant representative.
-
-Discriminant improvements do not reset the plateau counter.
-
-## Repository layout
+`candidates/current/` contains persistent lineages:
 
 ```text
-mini-igp8-experiment/
-├── mini_igp8/
-│   ├── baseline_solver.py     # intentionally bad clean-slate generator
-│   ├── solver.py              # only accepted incumbent
-│   ├── research.py            # generation controller
-│   ├── evaluator.py
-│   ├── verifier.py
-│   ├── storage.py
-│   └── ...
-├── candidates/
-│   ├── README.md
-│   └── current/               # runtime only, Git-ignored, auto-deleted
-├── results/                   # exactly six durable files
-├── data/targets.json
-├── tests/
-└── config.toml
+candidate-A/solver.py
+candidate-B/solver.py
+candidate-C/solver.py
+candidate-D/solver.py
+candidate-E/solver.py
+candidate-S/solver.py
 ```
 
-`candidates/current/` contains at most one active generation. It is removed after a generation
-and automatically cleaned on the next session after a crash. No `solver_v17.py`, run folders,
-proposal archives, worktrees, or agent-created notes accumulate.
+Normal research never deletes them. Terra continues its previous lineage rather than starting from scratch each generation. Invalid implementations are rolled back. Only `mini-igp8 new-run --yes` deletes the candidate workspace and restores the naive baseline.
 
-## Durable history
+The main repository stays clean because `/candidates/current/` is Git-ignored; the accepted incumbent alone lives at `mini_igp8/solver.py`.
 
-The six result files are:
+## Discriminants
+
+Public search computes polynomial discriminants because they cheaply prefilter potential field-discriminant improvements. New pairs always receive an exact number-field discriminant. For already-solved pairs, at most four promising pairs per 10k search batch receive an exact field-discriminant check.
+
+Discriminant improvements do **not** reset the 50,000-candidate plateau. Hidden tournament samples do not spend time optimizing discriminants.
+
+The catalogue preserves first-discovery and current-best provenance separately.
+
+## Commands
+
+```bash
+python -m pip install -e .
+mini-igp8 check
+mini-igp8 status
+mini-igp8 research
+```
+
+Resume uses the same run, catalogue, accepted solver, candidate lineages and history.
+
+A destructive clean slate is explicit:
+
+```bash
+mini-igp8 new-run --yes
+```
+
+## Default controls
+
+- public search batch: 10,000 candidates;
+- AI plateau: 50,000 stagnant public candidates;
+- Sage-call count: uncapped telemetry only;
+- Sage verification workers: 4;
+- AI calls/session: 45;
+- session wall time: 360 minutes;
+- Terra implementations: 5 in parallel;
+- candidate contract: 2,000 candidates within 30 seconds;
+- public 10k generation timeout: 120 seconds.
+
+If `verification_workers = 4` causes memory pressure, try 2. If Sage is CPU-bound and the machine has ample RAM/cores, try 6 and compare the new timing logs rather than assuming more workers is always faster.
+
+## Durable files
+
+The six result files remain stable:
 
 ```text
 results/catalogue.jsonl
@@ -95,60 +102,4 @@ results/seen_hashes.txt
 results/state.json
 ```
 
-`experiments.csv` and `history.jsonl` are append-only for the lifetime of one run. Earlier solver
-experiments are never deleted when a later solver is accepted. `report.md` now displays the
-**complete** solver experiment table instead of only the last ten rows.
-
-`seen_hashes.txt` is intentionally different: it is only a rolling duplicate-prevention window,
-not scientific history, and is bounded to 250,000 hashes.
-
-## Clean slate vs resume
-
-Install and validate:
-
-```bash
-python -m pip install -e .
-mini-igp8 check
-mini-igp8 status
-```
-
-Start or resume the same run:
-
-```bash
-mini-igp8 research
-```
-
-A new session resumes the same catalogue, accepted solver, generation critic feedback, search
-cursor, and complete history.
-
-Destroy the current experiment and return to the intentionally poor baseline:
-
-```bash
-mini-igp8 new-run --yes
-```
-
-A new run has an empty catalogue/history/seen set and `solver.py == baseline_solver.py`.
-
-## Default resource controls
-
-- Sage calls: **uncapped**; counted only as telemetry.
-- Sage verification workers: **6 total**. Each evaluation batch uses at most
-  six independent Sage processes; this is one global batch limit, not six
-  processes for each of A--E and S simultaneously.
-- AI calls/session: 45.
-- Wall time/session: 360 minutes.
-- One full generation normally uses 9 AI calls:
-  - 1 Sol lead research;
-  - 5 parallel Terra implementations;
-  - 1 Sol synthesis + 1 Terra synthesis when >=2 finalists survive;
-  - 1 Sol generation critic.
-
-With 45 calls, a session can usually complete about three full synthesis generations, with spare
-budget for partial cases. Increase this operational limit in `config.toml` if desired; it is not
-part of the mathematical acceptance criterion.
-
-## Important experimental hygiene
-
-Hidden screening/benchmark/fresh evidence never enters the public catalogue. Hidden seed values
-and hidden target identities from evaluation are not shown to Sol/Terra. Only normal search can
-claim a public discovery or improve a public discriminant record.
+`experiments.csv` and `history.jsonl` remain append-only for a run. `seen_hashes.txt` is only a rolling duplicate cache.

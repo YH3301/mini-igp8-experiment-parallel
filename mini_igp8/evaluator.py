@@ -12,8 +12,8 @@ import tempfile
 import time
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
-from itertools import repeat
 from multiprocessing import get_context
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -38,6 +38,49 @@ MAX_SOLVER_SOURCE_CHARS = 100_000
 
 
 MAX_BATCHED_SOLVER_CANDIDATES = 2000
+
+_VERIFICATION_WORKERS = 1
+_VERIFICATION_POOL: ProcessPoolExecutor | None = None
+
+
+def configure_verification_workers(workers: int) -> None:
+    """Configure the persistent Sage worker pool used by built-in verification."""
+
+    global _VERIFICATION_WORKERS, _VERIFICATION_POOL
+    workers = max(1, int(workers))
+    if workers == _VERIFICATION_WORKERS:
+        return
+    if _VERIFICATION_POOL is not None:
+        _VERIFICATION_POOL.shutdown(wait=True, cancel_futures=True)
+        _VERIFICATION_POOL = None
+    _VERIFICATION_WORKERS = workers
+
+
+def shutdown_verification_workers() -> None:
+    global _VERIFICATION_POOL
+    if _VERIFICATION_POOL is not None:
+        _VERIFICATION_POOL.shutdown(wait=True, cancel_futures=True)
+        _VERIFICATION_POOL = None
+
+
+def _verification_pool() -> ProcessPoolExecutor:
+    global _VERIFICATION_POOL
+    if _VERIFICATION_POOL is None:
+        # Spawn is safer than forking an already-imported Sage runtime.
+        _VERIFICATION_POOL = ProcessPoolExecutor(
+            max_workers=_VERIFICATION_WORKERS,
+            mp_context=get_context("spawn"),
+        )
+    return _VERIFICATION_POOL
+
+
+def _verify_builtin_job(payload: tuple[list[int], float, bool]) -> dict:
+    candidate, timeout_seconds, include_discriminant = payload
+    return verify(
+        candidate,
+        timeout_seconds=timeout_seconds,
+        include_polynomial_discriminant=include_discriminant,
+    )
 
 
 class SolverError(RuntimeError):
@@ -65,6 +108,7 @@ sys.stdout.write(json.dumps(results, separators=(",", ":")))
 '''
 
 
+@lru_cache(maxsize=4)
 def load_target_pairs(path: Path = TARGETS_FILE) -> frozenset[tuple[str, int]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     raw_pairs = data.get("pairs")
@@ -386,6 +430,58 @@ def validate_solver_contract(
             raise SolverError("solver_nondeterministic")
 
 
+
+
+def _verify_many(
+    candidates: list[list[int]],
+    *,
+    verifier: Callable[..., dict],
+    timeout_seconds: int | float,
+    include_polynomial_discriminant: bool,
+    deadline: float | None,
+    progress: Callable[[int, int], None] | None = None,
+    progress_every: int = 0,
+) -> list[dict]:
+    """Verify a batch, using persistent Sage processes for the built-in verifier."""
+
+    if not candidates:
+        return []
+    timeout = _remaining_timeout(timeout_seconds, deadline)
+    total = len(candidates)
+
+    if verifier is not verify or _VERIFICATION_WORKERS <= 1:
+        results: list[dict] = []
+        for index, candidate in enumerate(candidates, 1):
+            _check_deadline(deadline)
+            if verifier is verify:
+                result = verifier(
+                    candidate,
+                    timeout_seconds=_remaining_timeout(timeout_seconds, deadline),
+                    include_polynomial_discriminant=include_polynomial_discriminant,
+                )
+            else:
+                result = verifier(
+                    candidate,
+                    timeout_seconds=_remaining_timeout(timeout_seconds, deadline),
+                )
+            results.append(result)
+            _maybe_progress(progress, index, total, progress_every)
+        return results
+
+    payloads = [
+        (candidate, timeout, include_polynomial_discriminant)
+        for candidate in candidates
+    ]
+    results = []
+    # chunksize amortizes IPC while keeping enough independent work per core.
+    for index, result in enumerate(
+        _verification_pool().map(_verify_builtin_job, payloads, chunksize=8),
+        1,
+    ):
+        results.append(result)
+        _maybe_progress(progress, index, total, progress_every)
+    return results
+
 def _check_deadline(deadline: float | None) -> None:
     if deadline is not None and time.monotonic() >= deadline:
         raise EvaluationDeadlineExceeded("evaluation_deadline_reached")
@@ -399,39 +495,6 @@ def _maybe_progress(
 ) -> None:
     if progress is not None and (done == total or done == 1 or (every > 0 and done % every == 0)):
         progress(done, total)
-
-
-def _verify_exact(candidate: list[int], timeout_seconds: float) -> dict:
-    """A pickle-friendly Sage worker for process-pool evaluation."""
-
-    return verify(candidate, timeout_seconds=timeout_seconds)
-
-
-def _verify_batch(
-    candidates: list[list[int]],
-    *,
-    verifier: Callable[..., dict],
-    verification_seconds: int | float,
-    workers: int,
-    deadline: float | None,
-) -> list[dict]:
-    """Verify independent candidates concurrently without changing their order.
-
-    Only the built-in verifier uses worker processes. Tests and callers may pass
-    local verifier functions, which are deliberately kept in-process because
-    they need not be pickleable.
-    """
-
-    if not candidates:
-        return []
-    timeout = _remaining_timeout(verification_seconds, deadline)
-    if workers <= 1 or verifier is not verify or len(candidates) == 1:
-        return [verifier(candidate, timeout_seconds=timeout) for candidate in candidates]
-    with ProcessPoolExecutor(
-        max_workers=min(workers, len(candidates)),
-        mp_context=get_context("spawn"),
-    ) as pool:
-        return list(pool.map(_verify_exact, candidates, repeat(timeout)))
 
 
 def score_records(records: list[dict]) -> dict:
@@ -462,28 +525,31 @@ def evaluate_fixed(
     solver_seconds: int | float,
     verification_seconds: int | float,
     verifier: Callable[..., dict] = verify,
-    workers: int = 1,
     deadline: float | None = None,
     progress: Callable[[int, int], None] | None = None,
     progress_every: int = 0,
 ) -> tuple[dict, list[dict], set[str]]:
     seeds = tuple(int(seed) for seed in seeds)
     total = len(seeds) * candidates_per_seed
-    records: list[dict | None] = []
-    pending: list[tuple[int, int, int, list[int]]] = []
     hashes: set[str] = set()
     started = time.monotonic()
-    done = 0
     _check_deadline(deadline)
+
     batches = _call_solver_cases_chunked(
         solver_path,
         cases=[(seed, candidates_per_seed) for seed in seeds],
         timeout_seconds=solver_seconds,
         deadline=deadline,
     )
+    generated_at = time.monotonic()
+
+    records: list[dict | None] = []
+    to_verify: list[list[int]] = []
+    verify_positions: list[tuple[int, int, int]] = []
     for seed, candidates in zip(seeds, batches, strict=True):
         for index, candidate in enumerate(candidates):
             digest = coefficient_hash(candidate)
+            position = len(records)
             if digest in hashes:
                 records.append({
                     "status": "duplicate_candidate",
@@ -491,29 +557,34 @@ def evaluate_fixed(
                     "seed": seed,
                     "candidate_index": index,
                 })
-            else:
-                hashes.add(digest)
-                pending.append((len(records), seed, index, candidate))
-                records.append(None)
-    verified = _verify_batch(
-        [candidate for _, _, _, candidate in pending],
+                continue
+            hashes.add(digest)
+            records.append(None)
+            to_verify.append(candidate)
+            verify_positions.append((position, seed, index))
+
+    verified = _verify_many(
+        to_verify,
         verifier=verifier,
-        verification_seconds=verification_seconds,
-        workers=workers,
+        timeout_seconds=verification_seconds,
+        include_polynomial_discriminant=False,
         deadline=deadline,
+        progress=progress,
+        progress_every=progress_every,
     )
-    for (position, seed, index, _), result in zip(pending, verified, strict=True):
+    for result, (position, seed, index) in zip(verified, verify_positions, strict=True):
         records[position] = {**result, "seed": seed, "candidate_index": index}
-    complete = [record for record in records if record is not None]
-    for done in range(1, total + 1):
-        _maybe_progress(progress, done, total, progress_every)
-    summary = score_records(complete)
+
+    finalized = [record for record in records if record is not None]
+    _maybe_progress(progress, total, total, progress_every)
+    summary = score_records(finalized)
     summary.update({
-        "sage_calls": len(pending),
+        "sage_calls": len(to_verify),
+        "solver_elapsed_seconds": generated_at - started,
+        "verification_elapsed_seconds": time.monotonic() - generated_at,
         "elapsed_seconds": time.monotonic() - started,
     })
-    return summary, complete, hashes
-
+    return summary, finalized, hashes
 
 def _select_unseen(
     candidates: Iterable[list[int]],
@@ -544,12 +615,12 @@ def evaluate_search_batch(
     solver_seconds: int | float,
     verification_seconds: int | float,
     verifier: Callable[..., dict] = verify,
-    workers: int = 1,
     deadline: float | None = None,
     progress: Callable[[int, int], None] | None = None,
     progress_every: int = 0,
 ) -> tuple[dict, list[dict], set[str]]:
     _check_deadline(deadline)
+    started = time.monotonic()
     raw = call_solver(
         solver_path,
         seed=seed,
@@ -558,18 +629,18 @@ def evaluate_search_batch(
         deadline=deadline,
     )
     candidates = _select_unseen(raw, budget=budget, already_seen=already_seen)
-    started = time.monotonic()
-    total = len(candidates)
-    records = _verify_batch(
+    generated_at = time.monotonic()
+
+    records = _verify_many(
         candidates,
         verifier=verifier,
-        verification_seconds=verification_seconds,
-        workers=workers,
+        timeout_seconds=verification_seconds,
+        include_polynomial_discriminant=True,
         deadline=deadline,
+        progress=progress,
+        progress_every=progress_every,
     )
     processed_hashes = {coefficient_hash(candidate) for candidate in candidates}
-    for done in range(1, total + 1):
-        _maybe_progress(progress, done, total, progress_every)
     summary = score_records(records)
     summary.update({
         "requested": budget,
@@ -577,10 +648,11 @@ def evaluate_search_batch(
         "submitted": len(records),
         "sage_calls": len(records),
         "deadline_reached": False,
+        "solver_elapsed_seconds": generated_at - started,
+        "verification_elapsed_seconds": time.monotonic() - generated_at,
         "elapsed_seconds": time.monotonic() - started,
     })
     return summary, records, processed_hashes
-
 
 def summarize_fresh_records(
     records: list[dict],
@@ -636,52 +708,65 @@ def evaluate_fresh(
     solver_seconds: int | float,
     verification_seconds: int | float,
     verifier: Callable[..., dict] = verify,
-    workers: int = 1,
     deadline: float | None = None,
     progress: Callable[[int, int], None] | None = None,
     progress_every: int = 0,
 ) -> tuple[dict, list[dict], set[str]]:
     seeds = tuple(int(seed) for seed in seeds)
     total = len(seeds) * candidates_per_seed
-    records: list[dict | None] = []
-    pending: list[tuple[int, int, int, list[int]]] = []
     hashes: set[str] = set()
     started = time.monotonic()
     variant_seen = set(already_seen)
-    done = 0
     _check_deadline(deadline)
+
     batches = _call_solver_cases_chunked(
         solver_path,
         cases=[(seed, candidates_per_seed * oversample_factor) for seed in seeds],
         timeout_seconds=solver_seconds,
         deadline=deadline,
     )
+    generated_at = time.monotonic()
+
+    records: list[dict | None] = []
+    to_verify: list[list[int]] = []
+    verify_positions: list[tuple[int, int, int]] = []
     for seed, raw in zip(seeds, batches, strict=True):
-        candidates = _select_unseen(raw, budget=candidates_per_seed, already_seen=variant_seen)
+        candidates = _select_unseen(
+            raw, budget=candidates_per_seed, already_seen=variant_seen
+        )
         selected_hashes = {coefficient_hash(candidate) for candidate in candidates}
         variant_seen.update(selected_hashes)
         hashes.update(selected_hashes)
+
         for index, candidate in enumerate(candidates):
-            pending.append((len(records), seed, index, candidate))
+            position = len(records)
             records.append(None)
+            to_verify.append(candidate)
+            verify_positions.append((position, seed, index))
         for index in range(len(candidates), candidates_per_seed):
             records.append({
                 "status": "no_unseen_candidate",
                 "seed": seed,
                 "candidate_index": index,
             })
-    verified = _verify_batch(
-        [candidate for _, _, _, candidate in pending],
+
+    verified = _verify_many(
+        to_verify,
         verifier=verifier,
-        verification_seconds=verification_seconds,
-        workers=workers,
+        timeout_seconds=verification_seconds,
+        include_polynomial_discriminant=False,
         deadline=deadline,
+        progress=progress,
+        progress_every=progress_every,
     )
-    for (position, seed, index, _), result in zip(pending, verified, strict=True):
+    for result, (position, seed, index) in zip(verified, verify_positions, strict=True):
         records[position] = {**result, "seed": seed, "candidate_index": index}
-    complete = [record for record in records if record is not None]
-    for done in range(1, total + 1):
-        _maybe_progress(progress, done, total, progress_every)
-    summary = summarize_fresh_records(complete, catalogue_pairs=catalogue_pairs)
+
+    finalized = [record for record in records if record is not None]
+    _maybe_progress(progress, total, total, progress_every)
+    summary = summarize_fresh_records(finalized, catalogue_pairs=catalogue_pairs)
+    summary["solver_elapsed_seconds"] = generated_at - started
+    summary["verification_elapsed_seconds"] = time.monotonic() - generated_at
     summary["elapsed_seconds"] = time.monotonic() - started
-    return summary, complete, hashes
+    return summary, finalized, hashes
+
