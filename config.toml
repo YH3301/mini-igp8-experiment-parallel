@@ -55,8 +55,8 @@ max_checks_per_search_batch = 4
 # Sage calls are telemetry only and never stop a session.
 max_ai_calls_per_session = 45
 max_wall_minutes_per_session = 360
-ai_call_seconds = 600
-solver_call_seconds = 60
+ai_call_seconds = 900
+solver_call_seconds = 30
 search_solver_call_seconds = 60
 verification_seconds = 30
 verification_workers = 4
