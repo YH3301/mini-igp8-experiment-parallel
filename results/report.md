@@ -1,13 +1,13 @@
 # Mini-IGP8 status
 
 - Run: **78cf9bf6202f**
-- Catalogue: **116 / 157 pairs** across **41 / 50 groups**
-- Current frozen-benchmark score: **57280.84**
-- Search candidates checked: **296988**
-- Search candidates since new pair/solver change: **50000**
-- Accepted solver generations: **5**
-- Best-field-discriminant improvements: **147**
-- Last stop: `research_infrastructure_failure`
+- Catalogue: **117 / 157 pairs** across **41 / 50 groups**
+- Current frozen-benchmark score: **51230.927**
+- Search candidates checked: **358834**
+- Search candidates since new pair/solver change: **52645**
+- Accepted solver generations: **6**
+- Best-field-discriminant improvements: **166**
+- Last stop: `completed`
 
 ## Complete solver experiment history
 
@@ -71,6 +71,12 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 10 | C | no | implementation_failed |  |  |  |  |  | `solver_top_level_call_forbidden` | For an elliptic curve E/Q, its eight cyclic subgroups of order seven form a transitive projective Galois set. A degree-eight resolvent whose roots are suitably normalized invariants of those kernels generically realizes a projective mod-7 image such as PGL(2,7), placing candidates in a rare primitive region plausibly responsible for an entirely missing group rather than another quadratic-tower group. |
 | 10 | D | no | preliminary_rejected | 39200.822000000000 | 52260.710500000001 | 0 | 0 |  | `rejected_no_measured_gain` | For q(x)=x^2+c, the generic polynomial q^3(x)-t has the full depth-three binary-tree action, while square classes of q^j(0)-t control successive index-two descents. Setting t=q^j(0)-s^2 for j in {1,2,3}, or imposing two compatible relations, should realize proper tree subgroups that random compositions almost never hit and that are plausible sources of missing mid-range groups. |
 | 10 | E | no | preliminary_rejected | 4011.000000000000 | 5011.000000000000 | 0 | 0 |  | `rejected_no_measured_gain` | The previous CRT idea failed operationally because templates collided, not because local Frobenius steering was disproved. An injectively indexed CRT lattice can combine an irreducibility certificate at one prime, two independent squarefree cycle types at other primes, and a nearby real-root geometry. Selecting underfilled signature-cycle cells should explore transitive-group regions missed by both structured towers and random shells. |
+| 11 | A | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | For an elliptic curve over Q, the eight cyclic order-seven subgroups form the projective line P1(F7). Degree-eight resolvents for this action should realize projective mod-seven images such as PSL(2,7), PGL(2,7), and their transitive subgroups—an algebraic region poorly represented by towers, compositions, reciprocal polynomials, and generic coefficient shells, and therefore a strong source of entirely missing groups. |
+| 11 | B | no | final_round1_pruned | 12060.995999999999 | 16080.998500000000 | 1 | 3 |  | `final_round1_pruned` | In a real biquadratic field K=Q(sqrt(a),sqrt(b)), the four signs of c=c0+c1 sqrt(a)+c2 sqrt(b)+c3 sqrt(ab) determine the real-root count of K(sqrt(c)): it is exactly twice the number of positive conjugates of c. Choosing c0 from exact intervals between the four remaining embedding contributions can therefore force r=0,2,4,6, or 8 without rejection-heavy blind radicand sampling, concentrating especially on the many missing r=8 cells and the rare missing r=6 cells. |
+| 11 | C | no | preliminary_passed | 47230.885999999999 | 61280.805500000002 | 0 | 0 |  | `qualifier_passed` | Gaussian period polynomials from index-eight subgroups of cyclotomic Galois groups deterministically realize regular abelian degree-eight actions. Varying the conductor and subgroup quotient types C8, C4 x C2, and C2 x C2 x C2, while controlling whether complex conjugation lies in the subgroup, supplies structurally certified groups and signatures r=8 or r=0 that coefficient-shell and tower searches reach only accidentally. |
+| 11 | D | no | preliminary_passed | 38200.892000000000 | 44230.881500000003 | 1 | 3 |  | `qualifier_passed` | For a quadratic extension of a biquadratic base, the Galois-closure sign kernel is governed by the F2-rank of the four conjugate square classes of the final radicand. The incumbent samples this rank accidentally. Constructing radicands with different proven conjugate-product relations should deliberately realize several proper semidirect products while preserving the incumbent's reliable characteristic-polynomial, modular-screening, signature, and completion machinery. |
+| 11 | E | no | implementation_failed |  |  |  |  |  | `ai_call_timeout` | Small-discriminant fields are favored by monic polynomials built near carefully separated real linear factors and positive quadratic factors, then minimally perturbed to an irreducibility certificate. A deterministic portfolio spanning all even real-root counts can explore coefficient regions unlike towers and critical orbits, while exact polynomial-discriminant ranking supplies a useful surrogate for difficult field-discriminant improvements. |
+| 11 | S | yes | final | 39180.928000000000 | 51230.927000000003 | 1 | 53 |  | `accepted_discovery_gain` | Use candidate D as the breadth-oriented backbone, but turn B and D into one constraint-aware biquadratic-tower engine: B controls archimedean sign chambers while D controls conjugate square-class relations. Give B a protected ten-expansion quota because it produced the most fresh pairs with near-perfect throughput; retain D’s diversified supporting families for coverage; and reduce C’s Gaussian periods to a tiny, gated structural canary because its broad benchmark results did not translate into any fresh hit. Selection is lexicographic: predicted novelty first, verification probability second, and discriminant only after a group-signature cell is already covered. |
 
 ## Catalogue
 
@@ -112,7 +118,7 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T16 | 0 | 20000000 | `6746e8cd7253` | `6746e8cd7253` | `1, 2, 3, 4, 5, -26, 23, -8, 1` |
 | 8T16 | 4 | 2147483648 | `6746e8cd7253` | `6746e8cd7253` | `2, 0, 0, 0, -4, 0, 0, 0, 1` |
 | 8T17 | 0 | 1257728 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 5, -2, 9, -2, 5, 0, 1` |
-| 8T17 | 4 | 7842780125 | `1b8da6e43715` | `1b8da6e43715` | `1, 2, -4, -3, -12, -3, -4, 2, 1` |
+| 8T17 | 4 | 88410125 | `1b8da6e43715` | `f2d590cfc152` | `1, 2, -4, -3, 3, -3, -4, 2, 1` |
 | 8T17 | 8 | 22632992000 | `1b8da6e43715` | `1b8da6e43715` | `-7, 6, 35, -16, -48, -4, 18, 8, 1` |
 | 8T18 | 0 | 9144576 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 2, 0, 0, 0, -1, 0, 1` |
 | 8T18 | 4 | 19360000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -9, 0, 12, 0, -6, 0, 1` |
@@ -127,25 +133,26 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T21 | 8 | 725077721088 | `1b8da6e43715` | `1b8da6e43715` | `-7, 0, 64, 0, -64, 16, 16, -8, 1` |
 | 8T22 | 0 | 51840000 | `6746e8cd7253` | `6746e8cd7253` | `19, 58, 109, 136, 120, 74, 31, 8, 1` |
 | 8T22 | 4 | 3317760000 | `6746e8cd7253` | `1b8da6e43715` | `9, -216, 774, -1128, 877, -400, 108, -16, 1` |
+| 8T22 | 8 | 9167219919360000 | `f2d590cfc152` | `f2d590cfc152` | `-181044144, 74376000, 164160, -2536320, 194632, 12720, -1360, 0, 1` |
 | 8T23 | 2 | 22665187 | `6746e8cd7253` | `6746e8cd7253` | `1, -12, 28, -39, 38, -25, 13, -4, 1` |
 | 8T24 | 0 | 1763584 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, -2, 1, -2, 1, 0, 1` |
-| 8T24 | 4 | 184090624 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 0, 0, -1, 0, -2, 0, 1` |
+| 8T24 | 4 | 121176064 | `6746e8cd7253` | `f2d590cfc152` | `1, 0, -4, 0, -2, 0, 2, 0, 1` |
 | 8T24 | 8 | 89865650176 | `6746e8cd7253` | `6746e8cd7253` | `-1, 8, 32, -20, -49, -4, 18, 8, 1` |
 | 8T26 | 0 | 78675968 | `6746e8cd7253` | `6746e8cd7253` | `23, 86, 163, 192, 154, 86, 33, 8, 1` |
 | 8T26 | 2 | 22478848 | `6746e8cd7253` | `1b8da6e43715` | `1, 0, -2, -8, -10, -8, -2, 0, 1` |
 | 8T26 | 4 | 17356605021 | `6746e8cd7253` | `1b8da6e43715` | `1, 1, -3, 4, -7, 4, -3, 1, 1` |
 | 8T26 | 8 | 4557385400148288 | `1b8da6e43715` | `1b8da6e43715` | `48, 136, -1041, -768, 4464, -2096, 386, -32, 1` |
-| 8T27 | 0 | 5328125 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 5, -4, 9, -4, 5, -1, 1` |
+| 8T27 | 0 | 2828125 | `6746e8cd7253` | `f2d590cfc152` | `1, 2, 6, 11, 14, 13, 9, 4, 1` |
 | 8T27 | 2 | 196171875 | `6746e8cd7253` | `6746e8cd7253` | `1, 3, 3, 6, 5, 6, 3, 3, 1` |
 | 8T27 | 4 | 71303168 | `798a8888bc31` | `1b8da6e43715` | `-1, 4, -2, -8, 15, -16, 10, -4, 1` |
-| 8T27 | 6 | 380000000 | `6746e8cd7253` | `798a8888bc31` | `1, -6, 7, 2, -10, 8, 2, -4, 1` |
-| 8T27 | 8 | 2841328125 | `6746e8cd7253` | `6746e8cd7253` | `1, 12, -32, -51, 50, 99, 53, 12, 1` |
+| 8T27 | 6 | 74671875 | `6746e8cd7253` | `f2d590cfc152` | `1, 4, 0, -9, -6, 1, 5, 4, 1` |
+| 8T27 | 8 | 1292203125 | `6746e8cd7253` | `f2d590cfc152` | `1, 12, -40, -3, 104, -117, 55, -12, 1` |
 | 8T28 | 0 | 90870848 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 5, -5, 6, -5, 5, -3, 1` |
-| 8T28 | 4 | 288800000 | `6746e8cd7253` | `6746e8cd7253` | `5, 0, -15, 0, 14, 0, -6, 0, 1` |
+| 8T28 | 4 | 31878125 | `6746e8cd7253` | `f2d590cfc152` | `1, 3, 1, -2, -1, -2, 1, 3, 1` |
 | 8T28 | 8 | 9697230848 | `6746e8cd7253` | `6746e8cd7253` | `8, -64, -48, 288, 60, -208, 92, -16, 1` |
 | 8T29 | 0 | 3504384 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 1, 0, 2, 0, 2, 0, 1` |
 | 8T29 | 4 | 134560000 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 3, 0, -2, 0, -2, 0, 1` |
-| 8T29 | 8 | 989818050816 | `798a8888bc31` | `1b8da6e43715` | `-3, -36, 87, 432, 550, 328, 102, 16, 1` |
+| 8T29 | 8 | 308318109696 | `798a8888bc31` | `f2d590cfc152` | `1, 24, 32, -28, -51, -4, 18, 8, 1` |
 | 8T30 | 0 | 184146722816 | `6746e8cd7253` | `6746e8cd7253` | `14, 0, 16, 0, 12, 0, 4, 0, 1` |
 | 8T30 | 2 | 21434375 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 2, -5, 1, -5, 2, -1, 1` |
 | 8T30 | 4 | 368293445632 | `1b8da6e43715` | `1b8da6e43715` | `3598, 11520, 15456, 11424, 5128, 1440, 248, 24, 1` |
@@ -157,38 +164,38 @@ This table is intentionally append-only. Earlier rows are never hidden or delete
 | 8T31 | 8 | 8668643328 | `6746e8cd7253` | `1b8da6e43715` | `193, 1120, 2524, 2920, 1917, 740, 166, 20, 1` |
 | 8T32 | 0 | 1142440000 | `6746e8cd7253` | `6746e8cd7253` | `1, 6, 15, -4, -5, 20, 22, 8, 1` |
 | 8T32 | 4 | 94197431056 | `1b8da6e43715` | `1b8da6e43715` | `1, -1, -7, 1, -4, 1, -7, -1, 1` |
-| 8T35 | 0 | 1820637 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 3, -2, 5, -2, 3, -1, 1` |
+| 8T35 | 0 | 1492101 | `6746e8cd7253` | `f2d590cfc152` | `1, -4, 12, -21, 24, -19, 11, -4, 1` |
 | 8T35 | 2 | 4461875 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 7, -12, 13, -12, 7, -3, 1` |
 | 8T35 | 4 | 21550625 | `6746e8cd7253` | `6746e8cd7253` | `1, -3, 1, 6, -7, 2, 4, -4, 1` |
 | 8T35 | 6 | 134560000 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, -3, 0, 10, 0, -6, 0, 1` |
 | 8T35 | 8 | 1480160000 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, 24, 16, -38, -2, 19, -8, 1` |
 | 8T38 | 0 | 374863125 | `6746e8cd7253` | `6746e8cd7253` | `9, 30, 91, 189, 225, 153, 59, 12, 1` |
-| 8T38 | 2 | 62804734776 | `6746e8cd7253` | `6746e8cd7253` | `1, -4, 3, -5, 2, -5, 3, -4, 1` |
-| 8T38 | 4 | 95328615285 | `1b8da6e43715` | `1b8da6e43715` | `1, 0, -3, 3, -7, 3, -3, 0, 1` |
+| 8T38 | 2 | 4941382327 | `6746e8cd7253` | `f2d590cfc152` | `1, 1, -3, 1, 1, 1, -3, 1, 1` |
+| 8T38 | 4 | 8470941132 | `1b8da6e43715` | `f2d590cfc152` | `1, -3, 0, 2, 2, 2, 0, -3, 1` |
 | 8T39 | 0 | 11999296 | `6746e8cd7253` | `1b8da6e43715` | `1, 1, 1, -1, -2, -1, 1, 1, 1` |
 | 8T39 | 4 | 20502784 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -1, 0, 4, 0, -4, 0, 1` |
 | 8T39 | 8 | 323296862464 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, -10, 0, 19, 0, -9, 0, 1` |
-| 8T40 | 0 | 89579520000 | `6746e8cd7253` | `6746e8cd7253` | `3, 0, 0, 0, 3, 0, -2, 0, 1` |
-| 8T40 | 2 | 49836032 | `6746e8cd7253` | `6746e8cd7253` | `1, -2, 2, -4, 5, -4, 2, -2, 1` |
+| 8T40 | 0 | 12008989 | `6746e8cd7253` | `f2d590cfc152` | `1, -1, 4, -9, 13, -13, 9, -4, 1` |
+| 8T40 | 2 | 22665187 | `6746e8cd7253` | `f2d590cfc152` | `-1, -1, 4, -9, 13, -13, 9, -4, 1` |
 | 8T40 | 4 | 1839775223808 | `1b8da6e43715` | `1b8da6e43715` | `1, 6, 10, 8, 9, 8, 10, 6, 1` |
 | 8T41 | 0 | 3398389014784 | `6746e8cd7253` | `6746e8cd7253` | `5, 14, 11, 4, 8, 4, 2, 0, 1` |
 | 8T41 | 4 | 103539794176 | `6746e8cd7253` | `6746e8cd7253` | `3, -10, 9, -4, -4, 4, -2, 0, 1` |
 | 8T42 | 0 | 38340864 | `6746e8cd7253` | `6746e8cd7253` | `4, -4, 8, -8, 6, -4, 4, 0, 1` |
 | 8T44 | 0 | 1361513 | `6746e8cd7253` | `6746e8cd7253` | `1, 1, 2, 3, 3, 3, 2, 1, 1` |
 | 8T44 | 2 | 4711123 | `6746e8cd7253` | `6746e8cd7253` | `1, 3, 5, 8, 9, 8, 5, 3, 1` |
-| 8T44 | 4 | 24212981 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 2, 1, -7, 5, 3, -4, 1` |
+| 8T44 | 4 | 16324589 | `6746e8cd7253` | `f2d590cfc152` | `-1, -4, 4, 11, -6, -11, 1, 4, 1` |
 | 8T44 | 6 | 493550656 | `6746e8cd7253` | `6746e8cd7253` | `-1, 0, 7, 0, 1, 0, -4, 0, 1` |
 | 8T44 | 8 | 2941324032 | `6746e8cd7253` | `6746e8cd7253` | `-1, 12, 50, 0, -54, 10, 17, -8, 1` |
 | 8T45 | 0 | 55115776 | `6746e8cd7253` | `6746e8cd7253` | `1, 0, 4, -4, 1, -4, 2, 0, 1` |
 | 8T45 | 4 | 642318336 | `6746e8cd7253` | `6746e8cd7253` | `-2, -4, 0, 8, 6, -4, -4, 0, 1` |
 | 8T46 | 4 | 964048826432 | `6746e8cd7253` | `6746e8cd7253` | `8, 14, 18, 8, -3, -4, -4, 0, 1` |
-| 8T47 | 0 | 8577009 | `6746e8cd7253` | `6746e8cd7253` | `1, -1, 0, 2, 0, 2, 2, 0, 1` |
+| 8T47 | 0 | 4237568 | `6746e8cd7253` | `f2d590cfc152` | `1, 2, 0, -2, 0, 0, -1, 0, 1` |
 | 8T47 | 2 | 17269375 | `6746e8cd7253` | `6746e8cd7253` | `-1, 1, 0, -2, 2, 2, -2, 0, 1` |
 | 8T47 | 4 | 43755625 | `6746e8cd7253` | `6746e8cd7253` | `-1, -1, -1, 4, 5, -2, -4, 0, 1` |
 | 8T47 | 6 | 796999375 | `6746e8cd7253` | `6746e8cd7253` | `-1, -1, 4, -6, 8, 2, -6, 0, 1` |
 | 8T49 | 0 | 1328677150648576 | `798a8888bc31` | `798a8888bc31` | `4, 0, 100, 0, 0, 16, 0, 0, 1` |
-| 8T50 | 0 | 6867832 | `3e5ae5aac772` | `6746e8cd7253` | `1, -1, 0, 1, 0, 0, 0, 0, 1` |
-| 8T50 | 2 | 14733559 | `3e5ae5aac772` | `6746e8cd7253` | `-1, 0, 2, 0, 0, 3, 0, 0, 1` |
+| 8T50 | 0 | 3842353 | `3e5ae5aac772` | `f2d590cfc152` | `1, 0, 0, 1, 0, 0, -1, -1, 1` |
+| 8T50 | 2 | 6709211 | `3e5ae5aac772` | `f2d590cfc152` | `1, 1, 0, 0, 0, 0, -1, -1, 1` |
 | 8T50 | 4 | 97258409 | `3e5ae5aac772` | `6746e8cd7253` | `-1, 0, 0, 0, 0, -4, 0, 3, 1` |
 | 8T50 | 6 | 797603063 | `3e5ae5aac772` | `6746e8cd7253` | `1, 1, -16, 0, 20, 0, -8, 0, 1` |
 | 8T50 | 8 | 9133507832384 | `6746e8cd7253` | `6746e8cd7253` | `32, 12, -128, 0, 80, 0, -16, 0, 1` |

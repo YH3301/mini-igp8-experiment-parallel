@@ -1,43 +1,45 @@
 {
-  "accepted_solver_commit": "1b8da6e437155061b49d35469ba601d04ada71c2",
-  "discriminant_improvements_total": 147,
+  "accepted_solver_commit": "f2d590cfc1525fef2a6e981016852a701417f201",
+  "discriminant_improvements_total": 166,
   "generation_feedback": {
     "avoid": [
-      "Treating D\u2019s high benchmark score as evidence of discovery when all reported novelty metrics were zero.",
-      "Concluding that A, B, or C is mathematically unpromising from implementation failures alone.",
-      "Broadening D or E after their completed zero-novelty trials.",
-      "Using unrestricted solver calls or top-level solver calls that violate the evaluation interface.",
-      "Inferring hidden seeds, missing-pair identities, or desired group-signature combinations from these results."
+      "Selecting families by raw benchmark score alone; C had the highest score but zero fresh hits.",
+      "Expanding C broadly before it demonstrates novelty under a small fixed quota.",
+      "Treating A and E\u2019s AI-call timeouts as mathematical refutations.",
+      "Assuming B, D, and S found different hidden pairs; the reported data does not identify them.",
+      "Claiming that no discriminant improvements occurred when the relevant fields are blank.",
+      "Letting S\u2019s 53 repeated hits obscure that it added only one unique missing pair."
     ],
-    "diagnosis": "The incumbent wins because this generation produced no measured coverage gain. D and E were the only candidates to complete preliminary evaluation; both recorded 0 fresh missing pairs, 0 fresh pair hits, 0 fresh seed hits, and no discriminant improvements. D achieved strong raw scores (39200.822 screen; 52260.7105 benchmark), showing that its critical-orbit construction generated substantial valid material, but that material overlapped existing coverage. E also ran successfully but scored much lower (4011 screen; 5011 benchmark) and likewise added no novelty. A, B, and C were not evaluated: A timed out during the AI call, B during the solver call, and C violated the top-level solver-call constraint. These are operational failures, not evidence against their mathematical hypotheses. Overall, the generation favored ambitious constructions without first ensuring that each could complete a small, deterministic test.",
-    "next_generation_direction": "Rescue B as a deterministic micro-benchmark because its signature control is explicit and requires little solver work. Fix two or three small real biquadratic fields, enumerate bounded integer triples for the nonconstant coefficients of c, compute the four embedding contributions directly, and select the constant coefficient from the exact intervals that force each desired positivity count. Expand no more than 10 resulting octics, apply cheap squarefreeness and irreducibility filters, and give each survivor a strict verification timeout. Record completion count, runtime, realized signatures, fresh pair and seed hits, and discriminant improvements. Retire the construction if this fixed quota completes with zero novelty; do not enlarge the search beforehand.",
+    "diagnosis": "S won on measured discovery efficiency, not raw benchmark score. It produced 1 fresh missing pair and 53 fresh pair/seed hits, far exceeding B and D\u2019s 3 hits while preserving their shared 1-pair novelty. This supports combining B\u2019s signature chambers with D\u2019s square-class constraints as a focused engine. C achieved the highest benchmark score (61280.8055) but recorded zero novelty, so its Gaussian-period family mainly reproduced existing coverage. B demonstrated genuine novelty but was pruned after relatively low screen and benchmark scores. D also found the same amount of unique novelty with stronger scores, making it the better backbone. A and E failed through AI-call timeouts; those outcomes say nothing conclusive about their mathematical hypotheses. No discriminant conclusion is possible because every discriminant-improvement field is blank.",
+    "next_generation_direction": "Run a fixed-budget ablation of S\u2019s constraint-aware tower engine. On the same small list of biquadratic bases, test three explicitly separated batches: sign-chamber control only, square-class-relation control only, and their joint constraints. Cap each batch at ten expanded octics, deduplicate before expensive verification, impose strict per-polynomial timeouts, and record completion rate, realized signatures, distinct fresh pairs, total fresh hits, seeds, and discriminant results. Retain only joint constraint templates that add distinct novelty rather than repeatedly hitting the already observed pair; keep Gaussian periods to one tiny canary batch and do not enlarge A, C, or E until they pass similarly bounded completion tests.",
     "what_worked": [
-      "D\u2019s critical-orbit specialization completed screening and benchmarking and produced the generation\u2019s strongest raw scores.",
-      "E\u2019s injectively indexed CRT construction avoided the previously reported duplicate-within-call failure and reached preliminary evaluation.",
-      "The candidates explored genuinely distinct structural regions: quaternion extensions, signature-controlled quadratic towers, projective mod-7 resolvents, arboreal subgroups, and locally steered CRT polynomials."
+      "S converted the B/D synthesis into 53 fresh hits while discovering a fresh missing pair.",
+      "Both B and D independently demonstrated that constrained biquadratic towers can reach novel coverage.",
+      "D supplied substantially stronger screening and benchmark performance than B, supporting its use as the main implementation backbone.",
+      "C completed reliably and generated substantial valid material, making a small structural-canary role reasonable even though it added no coverage."
     ]
   },
   "incumbent_benchmark": {
     "candidate_slots": 2000,
-    "groups": 28,
-    "pairs": 57,
-    "sage_calls": 1938,
-    "score": 57280.84,
+    "groups": 23,
+    "pairs": 51,
+    "sage_calls": 1990,
+    "score": 51230.927,
     "status_counts": {
-      "duplicate_candidate": 62,
-      "reducible": 258,
-      "verified": 1680
+      "duplicate_candidate": 10,
+      "reducible": 136,
+      "verified": 1854
     },
-    "verified": 1680,
-    "verified_fraction": 0.84
+    "verified": 1854,
+    "verified_fraction": 0.927
   },
-  "incumbent_solver_hash": "75219ff98e52d669f68adc6409a0b6b6cdf4ab7680e91e59ab8b4b43dbf45b9b",
-  "last_new_pair_at": 246988,
-  "last_solver_change_at": 77988,
-  "last_stop_code": "research_infrastructure_failure",
-  "next_generation": 11,
-  "next_search_batch": 108,
+  "incumbent_solver_hash": "49ec43e1659b1f8087ae8df4950098ab738edadcace9207693cbe22e976e11d8",
+  "last_new_pair_at": 306189,
+  "last_solver_change_at": 296988,
+  "last_stop_code": "completed",
+  "next_generation": 12,
+  "next_search_batch": 115,
   "run_id": "78cf9bf6202f",
-  "search_candidates_total": 296988,
+  "search_candidates_total": 358834,
   "version": 5
 }
